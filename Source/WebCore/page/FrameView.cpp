@@ -171,6 +171,7 @@ FrameView::FrameView(Frame* frame)
     , m_slowRepaintObjectCount(0)
     , m_layoutTimer(this, &FrameView::layoutTimerFired)
     , m_layoutRoot(0)
+    , m_layoutPhase(OutsideLayout)
     , m_inSynchronousPostLayout(false)
     , m_postLayoutTasksTimer(this, &FrameView::postLayoutTimerFired)
     , m_isTransparent(false)
@@ -269,8 +270,7 @@ void FrameView::reset()
     m_delayedLayout = false;
     m_doFullRepaint = true;
     m_layoutSchedulingEnabled = true;
-    m_inLayout = false;
-    m_doingPreLayoutStyleUpdate = false;
+    m_layoutPhase = OutsideLayout;
     m_inSynchronousPostLayout = false;
     m_layoutCount = 0;
     m_nestedLayoutCount = 0;
@@ -717,7 +717,7 @@ void FrameView::updateCompositingLayersAfterStyleChange()
         return;
 
     // If we expect to update compositing after an incipient layout, don't do so here.
-    if (m_doingPreLayoutStyleUpdate || layoutPending() || root->needsLayout())
+    if (inPreLayoutStyleUpdate() || layoutPending() || root->needsLayout())
         return;
 
     // This call will make sure the cached hasAcceleratedCompositing is updated from the pref
@@ -1010,8 +1010,12 @@ inline void FrameView::forceLayoutParentViewIfNeeded()
 
 void FrameView::layout(bool allowSubtree)
 {
-    if (m_inLayout)
+    if (isInLayout())
         return;
+
+    // Many of the tasks performed during layout can cause this function to be re-entered,
+    // so save the layout phase now and restore it on exit.
+    TemporaryChange<LayoutPhase> layoutPhaseRestorer(m_layoutPhase, InPreLayout);
 
     // Protect the view from being deleted during layout (in recalcStyle)
     RefPtr<FrameView> protector(this);
@@ -1059,10 +1063,11 @@ void FrameView::layout(bool allowSubtree)
         if (!m_nestedLayoutCount && !m_inSynchronousPostLayout && m_postLayoutTasksTimer.isActive() && !inChildFrameLayoutWithFrameFlattening) {
             // This is a new top-level layout. If there are any remaining tasks from the previous
             // layout, finish them now.
-            m_inSynchronousPostLayout = true;
+            TemporaryChange<bool> inSynchronousPostLayoutChange(m_inSynchronousPostLayout, true);
             performPostLayoutTasks();
-            m_inSynchronousPostLayout = false;
         }
+
+        m_layoutPhase = InPreLayoutStyleUpdate;
 
         // Viewport-dependent media queries may cause us to need completely different style information.
         // Check that here.
@@ -1078,8 +1083,8 @@ void FrameView::layout(bool allowSubtree)
 
         // Always ensure our style info is up-to-date. This can happen in situations where
         // the layout beats any sort of style recalc update that needs to occur.
-        TemporaryChange<bool> changeDoingPreLayoutStyleUpdate(m_doingPreLayoutStyleUpdate, true);
         document->updateStyleIfNeeded();
+        m_layoutPhase = InPreLayout;
 
         subtree = m_layoutRoot;
 
@@ -1145,6 +1150,7 @@ void FrameView::layout(bool allowSubtree)
                         m_lastViewportSize = fixedLayoutSize();
                     else
                         m_lastViewportSize = visibleContentRect(true /*includeScrollbars*/).size();
+
                     m_lastZoomFactor = root->style()->zoom();
 
                     // Set the initial vMode to AlwaysOn if we're auto.
@@ -1175,6 +1181,8 @@ void FrameView::layout(bool allowSubtree)
                         rootRenderer->setChildNeedsLayout(true);
                 }
             }
+
+            m_layoutPhase = InPreLayout;
         }
 
         layer = root->enclosingLayer();
@@ -1190,9 +1198,14 @@ void FrameView::layout(bool allowSubtree)
             }
             LayoutStateDisabler layoutStateDisabler(disableLayoutState ? root->view() : 0);
 
-            m_inLayout = true;
+            ASSERT(m_layoutPhase == InPreLayout);
+            m_layoutPhase = InLayout;
+
             beginDeferredRepaints();
             forceLayoutParentViewIfNeeded();
+
+            ASSERT(m_layoutPhase == InLayout);
+
             root->layout();
 #if ENABLE(TEXT_AUTOSIZING)
             bool autosized = document->textAutosizer()->processSubtree(root);
@@ -1200,7 +1213,8 @@ void FrameView::layout(bool allowSubtree)
                 root->layout();
 #endif
             endDeferredRepaints();
-            m_inLayout = false;
+
+            ASSERT(m_layoutPhase == InLayout);
 
             if (subtree)
                 root->view()->popLayoutState(root);
@@ -1208,8 +1222,12 @@ void FrameView::layout(bool allowSubtree)
         m_layoutRoot = 0;
     } // Reset m_layoutSchedulingEnabled to its previous value.
 
+    m_layoutPhase = InViewSizeAdjust;
+
     if (!subtree && !toRenderView(root)->printing())
         adjustViewSize();
+
+    m_layoutPhase = InPostLayout;
 
     // Now update the positions of all layers.
     beginDeferredRepaints();
@@ -1249,10 +1267,9 @@ void FrameView::layout(bool allowSubtree)
                 if (RenderView* root = rootRenderer(this))
                     root->updateWidgetPositions();
             } else {
-                m_inSynchronousPostLayout = true;
+                TemporaryChange<bool> inSynchronousPostLayoutChange(m_inSynchronousPostLayout, true);
                 // Calls resumeScheduledEvents()
                 performPostLayoutTasks();
-                m_inSynchronousPostLayout = false;
             }
         }
         
@@ -1817,6 +1834,10 @@ void FrameView::scrollPositionChanged()
 
 void FrameView::repaintFixedElementsAfterScrolling()
 {
+    // If we're scrolling as a result of updating the view size after layout, we'll update widgets and layer positions soon anyway.
+    if (m_layoutPhase == InViewSizeAdjust)
+        return;
+
     // For fixed position elements, update widget positions and compositing layers after scrolling,
     // but only if we're not inside of layout.
     if (!m_nestedLayoutCount && hasViewportConstrainedObjects()) {

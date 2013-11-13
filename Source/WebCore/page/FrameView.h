@@ -103,7 +103,7 @@ public:
     void scheduleRelayoutOfSubtree(RenderObject*);
     void unscheduleRelayout();
     bool layoutPending() const;
-    bool isInLayout() const { return m_inLayout; }
+    bool isInLayout() const { return m_layoutPhase == InLayout; }
 
     RenderObject* layoutRoot(bool onlyDuringLayout = false) const;
     void clearLayoutRoot() { m_layoutRoot = 0; }
@@ -387,6 +387,18 @@ private:
     void reset();
     void init();
 
+    enum LayoutPhase {
+        OutsideLayout,
+        InPreLayout,
+        InPreLayoutStyleUpdate,
+        InLayout,
+        InViewSizeAdjust,
+        InPostLayout,
+    };
+    LayoutPhase layoutPhase() const { return m_layoutPhase; }
+
+    bool inPreLayoutStyleUpdate() const { return m_layoutPhase == InPreLayoutStyleUpdate; }
+
     virtual bool isFrameView() const;
 
     friend class RenderWidget;
@@ -489,10 +501,9 @@ private:
     Timer<FrameView> m_layoutTimer;
     bool m_delayedLayout;
     RenderObject* m_layoutRoot;
-    
+
+    LayoutPhase m_layoutPhase;
     bool m_layoutSchedulingEnabled;
-    bool m_inLayout;
-    bool m_doingPreLayoutStyleUpdate;
     bool m_inSynchronousPostLayout;
     int m_layoutCount;
     unsigned m_nestedLayoutCount;
