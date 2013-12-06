@@ -1,4 +1,9 @@
 CONFIG -= qt
 SOURCES = libxslt.cpp
-CONFIG += link_pkgconfig
-PKGCONFIG += libxslt
+mac {
+    QMAKE_CXXFLAGS += -iwithsysroot /usr/include/libxslt -iwithsysroot /usr/include/libxml2
+    LIBS += -lxslt
+} else {
+    CONFIG += link_pkgconfig
+    PKGCONFIG += libxslt
+}
