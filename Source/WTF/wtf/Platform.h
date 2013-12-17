@@ -911,6 +911,16 @@
 #define ENABLE_DISASSEMBLER 1
 #endif
 
+/* Disable the LLINT on versions of GCC prior to 4.3. Mainly due to buggy assembler on OSX 10.6, the only supported platform using that old a version. */
+#if !defined(ENABLE_LLINT) && COMPILER(GCC) && !GCC_VERSION_AT_LEAST(4, 3, 0)
+#define ENABLE_LLINT 0
+#endif
+
+/* LLINT on ARM depends on an FPU */
+#if !defined(ENABLE_LLINT) && CPU(ARM) && !CPU(ARM_HARDFP)
+#define ENABLE_LLINT 0
+#endif
+
 /* On some of the platforms where we have a JIT, we want to also have the 
    low-level interpreter. */
 #if !defined(ENABLE_LLINT) \
