@@ -11,6 +11,9 @@ equals(QT_MAJOR_VERSION, 4) {
         error("The environment variable QMAKEPATH needs to point to $WEBKITSRC/Tools/qmake")
         # Otherwise we won't pick up the feature prf files needed for the build
     }
+    CONFIG += production_build
+    include(Tools/qmake/configure.pri)
+    QMAKE_SUBSTITUTES += .qmake.cache.in
 } else:!webkit_configured {
     CONFIG += webkit_configured
     CONFIG += production_build

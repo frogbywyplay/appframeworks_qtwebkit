@@ -22,6 +22,8 @@ haveQt(5) {
             error("To build QtWebKit with Qt 5 you need to build Qt 5 with libICU support. Check for ICU support being mentioned in qtbase/config.summary.")
         }
     }
+} else {
+    load(.qmake.cache)
 }
 
 linux-*:contains(DEFINES, WTF_USE_GSTREAMER=1) {
