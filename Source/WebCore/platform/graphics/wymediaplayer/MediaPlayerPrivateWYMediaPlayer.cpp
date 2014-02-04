@@ -26,7 +26,6 @@ using namespace WebCore;
 // ImageWYMediaPlayer class
 //////////////////////////////////////////
 #include "GOwnPtr.h"
-#include "BitmapImage.h"
 #include <wtf/PassRefPtr.h>
 
 #if PLATFORM(CAIRO)
@@ -104,6 +103,7 @@ CWYMediaPlayerLibrary               g_libraryWYMediaPlayer;
 WYSmartPtr<IFactory>                g_spWYMediaPlayerFactory;
 WYSmartPtr<IMediaPlayersManager>    g_spMediaPlayersManager;
 bool                                g_bTraceEnabled = false;
+bool                                g_bPreserveAspectRatio = true;
 
 bool MediaPlayerPrivateWYMediaPlayer::doWYMediaPlayerInit()
 {
@@ -147,6 +147,9 @@ bool MediaPlayerPrivateWYMediaPlayer::doWYMediaPlayerInit()
 
     char*   l_pTraceEnabled = getenv("html5video_debug");
     g_bTraceEnabled = (l_pTraceEnabled != NULL);
+    char*   l_pPreserveAspectRatio = getenv("html5video_preserveaspect");
+    std::string l_strPreserveAspectRatio = (l_pPreserveAspectRatio) ? l_pPreserveAspectRatio : "";
+    g_bPreserveAspectRatio = (l_strPreserveAspectRatio.compare("0"));
 
     return true;
 }
@@ -888,23 +891,86 @@ void MediaPlayerPrivateWYMediaPlayer::paintToTextureMapper(TextureMapper* textur
 }
 #endif
 
+RefPtr<BitmapImage> MediaPlayerPrivateWYMediaPlayer::bitmapImageFromDirectFBSurface(IDirectFBSurface* p_pDirectFBSurface) const
+{
+    RefPtr<BitmapImage> l_image;
+    if (!p_pDirectFBSurface)
+    {
+        WYTRACE_ERROR("(!p_pDirectFBSurface)\n");
+        return NULL;
+    }
+#if PLATFORM(CAIRO)
+    cairo_surface_t*    l_pCairoSurface = NULL;
+    l_pCairoSurface = cairo_directfb_surface_create(m_pDirectFB, p_pDirectFBSurface);
+    if (!l_pCairoSurface)
+    {
+        WYTRACE_ERROR("(l_pCairoSurface == NULL)\n");
+    }
+    else
+    {
+        l_image = BitmapImage::create(l_pCairoSurface);
+    }
+#elif PLATFORM(QT)
+    QPixmap* l_pPixmap = new QPixmap();
+
+    (*l_pPixmap) = QPixmap::fromDirectFBSurface(p_pDirectFBSurface);
+
+    l_image = BitmapImage::create(l_pPixmap);
+#endif
+    return l_image;
+}
+
 bool MediaPlayerPrivateWYMediaPlayer::renderVideoFrame(GraphicsContext* c, const IntRect& r) const
 {
     IDirectFBSurface*   l_pDirectFBSurface = NULL;
+
     if (m_spWebkitMediaPlayer->videoFrame(&l_pDirectFBSurface, r.x(), r.y(), r.width(), r.height()))
     {
+        FloatRect rect(r.x(), r.y(), r.width(), r.height());
+        c->clearRect(rect);
         if (l_pDirectFBSurface)
         {
-            QPixmap* l_pPixmap = new QPixmap();
-            RefPtr<BitmapImage> l_image;
+            int l_nDirectFBSurfaceWidth;
+            int l_nDirectFBSurfaceHeight;
+            DFBResult   l_dfbResult;
+            l_dfbResult = l_pDirectFBSurface->GetSize(l_pDirectFBSurface, &l_nDirectFBSurfaceWidth, &l_nDirectFBSurfaceHeight);
+            if (l_dfbResult == DFB_OK)
+            {
+                RefPtr<BitmapImage> l_image = bitmapImageFromDirectFBSurface(l_pDirectFBSurface);
+                if (l_image.get())
+                {
+                    IntRect l_rectDestinationArea = r;
+                    bool    l_bAdaptToAspectRatio = g_bPreserveAspectRatio;
+                    if (l_bAdaptToAspectRatio)
+                    {
+                        // Compute blit destination area
+                        float   l_fGraphicsContextRatio = rect.width() / rect.height();
+                        float   l_fDFBSurfaceRatio = ((float)l_nDirectFBSurfaceWidth) / ((float)l_nDirectFBSurfaceHeight);
+                        if (l_fGraphicsContextRatio > l_fDFBSurfaceRatio)
+                        {
+                            l_rectDestinationArea.setHeight(r.height());
+                            l_rectDestinationArea.setWidth((int)(l_fDFBSurfaceRatio * ((float)l_rectDestinationArea.height())));
+                            l_rectDestinationArea.setX((r.width() - l_rectDestinationArea.width()) / 2);
+                            l_rectDestinationArea.setY(0);
+                        }
+                        else
+                        {
+                            l_rectDestinationArea.setWidth(r.width());
+                            l_rectDestinationArea.setHeight((int)(((float)l_rectDestinationArea.width()) / l_fDFBSurfaceRatio));
+                            l_rectDestinationArea.setX(0);
+                            l_rectDestinationArea.setY((r.height() - l_rectDestinationArea.height()) / 2);
 
-            (*l_pPixmap) = QPixmap::fromDirectFBSurface(l_pDirectFBSurface);
-
-            l_image = BitmapImage::create(l_pPixmap);
-            FloatRect rect(r.x(), r.y(), r.width(), r.height());
-             c->clearRect(rect);
-            c->drawImage(reinterpret_cast<Image*>(l_image.get()), ColorSpaceSRGB, r, CompositeCopy, false);
-
+                        }
+                        l_rectDestinationArea.setX(l_rectDestinationArea.x() + r.x());
+                        l_rectDestinationArea.setY(l_rectDestinationArea.y() + r.y());
+                    }
+                    c->drawImage(reinterpret_cast<Image*>(l_image.get()), ColorSpaceSRGB, l_rectDestinationArea, CompositeCopy, false);
+                }
+            }
+            else
+            {
+                WYTRACE_ERROR("l_pDirectFBSurface->GetSize() FAILED (l_dfbResult = 0x%08X (%d))\n", l_dfbResult, l_dfbResult);
+            }
             l_pDirectFBSurface->Release(l_pDirectFBSurface);
             l_pDirectFBSurface = NULL;
             return true;
@@ -930,53 +996,7 @@ void MediaPlayerPrivateWYMediaPlayer::paint(GraphicsContext* c, const IntRect& r
     if (!m_webCorePlayer->visible())
         return;
 
-#if PLATFORM(CAIRO)
-    IDirectFBSurface*   l_pDirectFBSurface = NULL;
-    if (m_spWebkitMediaPlayer->videoFrame(&l_pDirectFBSurface, r.x(), r.y(), r.width(), r.height()))
-    {
-        if (l_pDirectFBSurface)
-        {
-            cairo_surface_t*    l_pCairoSurface = NULL;
-            l_pCairoSurface = cairo_directfb_surface_create(m_pDirectFB, l_pDirectFBSurface);
-            if (l_pCairoSurface)
-            {
-                RefPtr<BitmapImage> l_image;
-                l_image = BitmapImage::create(l_pCairoSurface);
-                FloatRect rect(r.x(), r.y(), r.width(), r.height());
-                c->clearRect(rect);
-                c->drawImage(reinterpret_cast<Image*>(l_image.get()), ColorSpaceSRGB, r, CompositeCopy, false);
-            }
-            else
-            {
-                WYTRACE_ERROR("(l_pCairoSurface == NULL)\n");
-            }
-
-            l_pDirectFBSurface->Release(l_pDirectFBSurface);
-            l_pDirectFBSurface = NULL;
-        }
-        else
-        {
-            WYTRACE_ERROR("(l_pDirectFBSurface == NULL)\n");
-        }
-    }
-    else
-    {
-        // Draw a black rect (not transparent)
-        FloatRect rect(r.x(), r.y(), r.width(), r.height());
-        c->fillRect(r, Color(0, 0, 0), ColorSpaceSRGB);
-    }
-#elif PLATFORM(QT)
-    if (!renderVideoFrame(c, r))
-    {
-        // Draw a black rect (not transparent)
-        FloatRect rect(r.x(), r.y(), r.width(), r.height());
-        c->fillRect(r, Color(0, 0, 0), ColorSpaceSRGB);
-    }
-#else //  PLATFORM(QT)
-    // Draw a black rect (transparent)
-    FloatRect rect(r.x(), r.y(), r.width(), r.height());
-    c->clearRect(rect);
-#endif // #if PLATFORM(QT)
+    renderVideoFrame(c, r);
 }
 
 void MediaPlayerPrivateWYMediaPlayer::updateStates()

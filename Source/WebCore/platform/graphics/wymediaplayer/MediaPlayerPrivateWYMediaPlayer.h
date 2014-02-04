@@ -18,6 +18,7 @@
 #include <wtf/Threading.h>
 #include "MediaPlayerPrivate.h"
 #include "Timer.h"
+#include "BitmapImage.h"
 
 #include <directfb/directfb.h>
 
@@ -84,6 +85,8 @@ protected:
 
             void fillTimerFired(Timer<MediaPlayerPrivateWYMediaPlayer>*);
             bool renderVideoFrame(GraphicsContext* c, const IntRect& r) const;
+
+            RefPtr<BitmapImage> bitmapImageFromDirectFBSurface(IDirectFBSurface* p_pDirectFBSurface) const;
 
             void updateStates();
 public:
