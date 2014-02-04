@@ -22,6 +22,7 @@
 #include "config.h"
 #include "qwebview.h"
 
+#include "GCController.h"
 #include "Page.h"
 #include "QWebPageClient.h"
 #include "Settings.h"
@@ -814,6 +815,14 @@ void QWebView::reload()
 {
     if (d->page)
         d->page->triggerAction(QWebPage::Reload);
+}
+
+/*!
+    Triggers the JS garbage collector.
+*/
+void QWebView::collectJavascriptGarbage()
+{
+    WebCore::gcController().garbageCollectNow();
 }
 
 /*! \reimp

@@ -120,6 +120,8 @@ public Q_SLOTS:
 
     void print(QPrinter*) const;
 
+    static void collectJavascriptGarbage();
+
 Q_SIGNALS:
     void loadStarted();
     void loadProgress(int progress);
