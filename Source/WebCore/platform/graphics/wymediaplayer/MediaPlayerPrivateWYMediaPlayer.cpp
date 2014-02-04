@@ -103,6 +103,7 @@ ImageWYMediaPlayer::~ImageWYMediaPlayer()
 CWYMediaPlayerLibrary               g_libraryWYMediaPlayer;
 WYSmartPtr<IFactory>                g_spWYMediaPlayerFactory;
 WYSmartPtr<IMediaPlayersManager>    g_spMediaPlayersManager;
+bool                                g_bTraceEnabled = false;
 
 bool MediaPlayerPrivateWYMediaPlayer::doWYMediaPlayerInit()
 {
@@ -143,6 +144,10 @@ bool MediaPlayerPrivateWYMediaPlayer::doWYMediaPlayerInit()
             return false;
         }
     }
+
+    char*   l_pTraceEnabled = getenv("html5video_debug");
+    g_bTraceEnabled = (l_pTraceEnabled != NULL);
+
     return true;
 }
 
@@ -864,12 +869,14 @@ PlatformMedia MediaPlayerPrivateWYMediaPlayer::platformMedia() const
 
 void MediaPlayerPrivateWYMediaPlayer::paintCurrentFrameInContext(GraphicsContext* c, const IntRect& r)
 {
+//    printf("%s:%s():%d : MediaPlayerPrivateWYMediaPlayer::paintCurrentFrameInContext()\n", __FILE__, __FUNCTION__, __LINE__);
     paint(c, r);
 }
 
 #if USE(ACCELERATED_COMPOSITING) && USE(TEXTURE_MAPPER)
 void MediaPlayerPrivateWYMediaPlayer::paintToTextureMapper(TextureMapper* textureMapper, const FloatRect& targetRect, const TransformationMatrix& matrix, float opacity, BitmapTexture*) const
 {
+//    printf("%s:%s():%d : MediaPlayerPrivateWYMediaPlayer::paintToTextureMapper()\n", __FILE__, __FUNCTION__, __LINE__);
         GraphicsContext* context = textureMapper->graphicsContext();
         QPainter* painter = context->platformContext();
         painter->save();
@@ -884,21 +891,10 @@ void MediaPlayerPrivateWYMediaPlayer::paintToTextureMapper(TextureMapper* textur
 bool MediaPlayerPrivateWYMediaPlayer::renderVideoFrame(GraphicsContext* c, const IntRect& r) const
 {
     IDirectFBSurface*   l_pDirectFBSurface = NULL;
-    if (m_spWebkitMediaPlayer->frame(&l_pDirectFBSurface))
+    if (m_spWebkitMediaPlayer->videoFrame(&l_pDirectFBSurface, r.x(), r.y(), r.width(), r.height()))
     {
         if (l_pDirectFBSurface)
         {
-#if 0
-            static int redColor = 128;
-            redColor += 64;
-            if (redColor > 255)
-                redColor = 0;
-            FloatRect rect(r.x(), r.y(), r.width(), r.height());
-            c->setFillColor(Color(128, 0, 255, 255), ColorSpaceSRGB);
-            c->clearRect(rect);
-            c->setFillColor(Color(redColor, 255, 255, 255), ColorSpaceSRGB);
-            c->drawEllipse(r);
-#else
             QPixmap* l_pPixmap = new QPixmap();
             RefPtr<BitmapImage> l_image;
 
@@ -908,7 +904,7 @@ bool MediaPlayerPrivateWYMediaPlayer::renderVideoFrame(GraphicsContext* c, const
             FloatRect rect(r.x(), r.y(), r.width(), r.height());
              c->clearRect(rect);
             c->drawImage(reinterpret_cast<Image*>(l_image.get()), ColorSpaceSRGB, r, CompositeCopy, false);
-#endif
+
             l_pDirectFBSurface->Release(l_pDirectFBSurface);
             l_pDirectFBSurface = NULL;
             return true;
@@ -925,19 +921,18 @@ bool MediaPlayerPrivateWYMediaPlayer::renderVideoFrame(GraphicsContext* c, const
 
 void MediaPlayerPrivateWYMediaPlayer::paint(GraphicsContext* c, const IntRect& r)
 {
+//    printf("%s:%s():%d : MediaPlayerPrivateWYMediaPlayer::paint()\n", __FILE__, __FUNCTION__, __LINE__);
+    WYTRACE_DEBUG("Paint area : (%d, %d) - (%d x %d)\n", r.x(), r.y(), r.width(), r.height());
     updateStates();
     if (c->paintingDisabled())
         return;
 
     if (!m_webCorePlayer->visible())
         return;
-#if 1
-    m_spWebkitMediaPlayer->beginPaint();
 
 #if PLATFORM(CAIRO)
-#if 1
     IDirectFBSurface*   l_pDirectFBSurface = NULL;
-    if (m_spWebkitMediaPlayer->frame(&l_pDirectFBSurface))
+    if (m_spWebkitMediaPlayer->videoFrame(&l_pDirectFBSurface, r.x(), r.y(), r.width(), r.height()))
     {
         if (l_pDirectFBSurface)
         {
@@ -970,25 +965,6 @@ void MediaPlayerPrivateWYMediaPlayer::paint(GraphicsContext* c, const IntRect& r
         FloatRect rect(r.x(), r.y(), r.width(), r.height());
         c->fillRect(r, Color(0, 0, 0), ColorSpaceSRGB);
     }
-
-#else // #if 1
-    cairo_surface_t*    l_pCairoSurface = NULL;
-    if (m_spWebkitMediaPlayer->frame(&l_pCairoSurface))
-    {
-        RefPtr<BitmapImage> l_image;
-        if (l_pCairoSurface)
-        {
-            l_image = BitmapImage::create(l_pCairoSurface);
-            FloatRect rect(r.x(), r.y(), r.width(), r.height());
-            c->clearRect(rect);
-            c->drawImage(reinterpret_cast<Image*>(l_image.get()), ColorSpaceSRGB, r, CompositeCopy, false);
-        }
-        else
-        {
-            WYTRACE_ERROR("(l_pCairoSurface == NULL)\n");
-        }
-    }
-#endif // #if 1
 #elif PLATFORM(QT)
     if (!renderVideoFrame(c, r))
     {
@@ -997,44 +973,10 @@ void MediaPlayerPrivateWYMediaPlayer::paint(GraphicsContext* c, const IntRect& r
         c->fillRect(r, Color(0, 0, 0), ColorSpaceSRGB);
     }
 #else //  PLATFORM(QT)
-    void*                   l_pBuffer = NULL;
-    int                     l_nFrameWidth = 0;
-    int                     l_nFrameHeight = 0;
-    eMediaPlayerPixelFormat l_eMediaPlayerPixelFormat;
-    if (m_spWebkitMediaPlayer->frame(&l_pBuffer, &l_nFrameWidth, &l_nFrameHeight, &l_eMediaPlayerPixelFormat))
-    {
-        // Create an image with this buffer
-        RefPtr<ImageWYMediaPlayer> l_spImage = ImageWYMediaPlayer::createImage(l_pBuffer, l_nFrameWidth, l_nFrameHeight, l_eMediaPlayerPixelFormat);
-        if (l_spImage)
-        {
-            c->drawImage(reinterpret_cast<Image*>(l_spImage->image().get()), ColorSpaceSRGB, r, CompositeCopy, false);
-        }
-    }
-    else
-    {
-        // Draw a black rect (transparent)
-        // Overlay mode
-        FloatRect rect(r.x(), r.y(), r.width(), r.height());
-        c->clearRect(rect);
-    }
-#endif // #if PLATFORM(QT)
-
-    m_spWebkitMediaPlayer->endPaint();
-
-#else
-    // Overlay mode
+    // Draw a black rect (transparent)
     FloatRect rect(r.x(), r.y(), r.width(), r.height());
     c->clearRect(rect);
-
-    // Convert position from frame coordinate space to screen coordinate space
-    Frame* frame = mp->m_player->frameView() ? mp->m_player->frameView()->frame() : 0;
-    if (frame)
-    {
-        frame->convertToRenderer
-    }
-
-    m_spWebkitMediaPlayer->paint((void*)c , r.x(), r.y(), r.width(), r.height());
-#endif
+#endif // #if PLATFORM(QT)
 }
 
 void MediaPlayerPrivateWYMediaPlayer::updateStates()
@@ -1219,15 +1161,18 @@ void MediaPlayerPrivateWYMediaPlayer::durationChanged()
 #if PLATFORM(QT)
 void MediaPlayerPrivateWYMediaPlayer::onRepaintAsked()
 {
+//    printf("%s:%s():%d : MediaPlayerPrivateWYMediaPlayer::onRepaintAsked()\n", __FILE__, __FUNCTION__, __LINE__);
     if (m_webCorePlayer) m_webCorePlayer->repaint();
 }
 void MediaPlayerPrivateWYMediaPlayer::repaint()
 {
+//    printf("%s:%s():%d : MediaPlayerPrivateWYMediaPlayer::repaint()\n", __FILE__, __FUNCTION__, __LINE__);
     if (m_pVideoItem) m_pVideoItem->notifyRepaint();
 }
 #else
 void MediaPlayerPrivateWYMediaPlayer::repaint()
 {
+//    printf("%s:%s():%d : MediaPlayerPrivateWYMediaPlayer::repaint()\n", __FILE__, __FUNCTION__, __LINE__);
     if (m_webCorePlayer) m_webCorePlayer->repaint();
 }
 #endif

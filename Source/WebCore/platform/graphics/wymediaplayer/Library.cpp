@@ -38,7 +38,7 @@ bool CLibrary::load(const char* p_szLibraryFilePathName)
 
 	if (m_hLibrary == NULL)
 	{
-		WYTRACE_DEBUG("Can not open library '%s' (%s)\n", p_szLibraryFilePathName, dlerror());
+	    WYTRACE_ERROR("Can not open library '%s' (%s)\n", p_szLibraryFilePathName, dlerror());
 		return false;
 	}
 

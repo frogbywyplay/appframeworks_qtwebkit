@@ -17,13 +17,10 @@
 #undef NDEBUG
 #define WYTRACE_ERROR(fmt, args...) printf("%s:%s():%d : ERROR : " fmt, __FILE__, __FUNCTION__, __LINE__, ##args);
 
-#ifndef NDEBUG
-    #define WY_TRACK(__classname) printf("%s:%d - %s::%s()\n", __FILE__, __LINE__, #__classname, __FUNCTION__);
-    #define WYTRACE_DEBUG(fmt, args...) printf("%s:%s():%d : DEBUG : " fmt, __FILE__, __FUNCTION__, __LINE__, ##args);
-#else
-    #define WY_TRACK(__classname) ;
-    #define WYTRACE_DEBUG(_domain, fmt, args...)
-#endif
+extern bool g_bTraceEnabled;
+
+#define WY_TRACK(__classname) if (g_bTraceEnabled) printf("%s:%d - %s::%s()\n", __FILE__, __LINE__, #__classname, __FUNCTION__);
+#define WYTRACE_DEBUG(fmt, args...) if (g_bTraceEnabled) printf("%s:%s():%d : DEBUG : " fmt, __FILE__, __FUNCTION__, __LINE__, ##args);
 
 #define WY_NOT_IMPLEMENTED()    WYTRACE_ERROR("NOT IMPLEMENTED\n");
 
@@ -39,5 +36,6 @@
 #define DYNAMIC_TRACE(__ENV_VARIABLE_NAME, fmt, args...) \
         if (g_b##__ENV_VARIABLE_NAME)  printf(fmt "\n", ##args);
 #endif
+
 
 #endif /* DEBUG_H_ */
