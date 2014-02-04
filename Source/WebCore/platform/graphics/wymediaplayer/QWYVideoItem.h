@@ -12,6 +12,12 @@
 
 namespace WebCore
 {
+#ifdef ENABLE_GLNEXUS_SUPPORT
+class QWYVideoItem
+{
+};
+#else
+
 class MediaPlayerPrivateWYMediaPlayer;
 
 class QWYVideoItem : public QObject
@@ -33,7 +39,7 @@ Q_SIGNALS:
 public:
         void notifyRepaint();
 };
-
+#endif // ENABLE_GLNEXUS_SUPPORT
 };
 
 #endif /* QWYVIDEOITEM_H_ */

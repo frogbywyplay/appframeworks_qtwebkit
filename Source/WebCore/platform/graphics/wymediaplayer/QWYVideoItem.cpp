@@ -4,8 +4,10 @@
  *  Created on: 2 déc. 2011
  *      Author: sroyer
  */
-
+#include "config.h"
 #include "QWYVideoItem.h"
+
+#ifndef ENABLE_GLNEXUS_SUPPORT
 #include "MediaPlayerPrivateWYMediaPlayer.h"
 #include <stdio.h>
 
@@ -34,3 +36,4 @@ void QWYVideoItem::onRepaintAsked()
         m_pMediaPlayerPrivateWYMediaPlayer->onRepaintAsked();
     }
 }
+#endif // ENABLE_GLNEXUS_SUPPORT

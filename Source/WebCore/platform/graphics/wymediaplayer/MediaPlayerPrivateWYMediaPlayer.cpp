@@ -19,23 +19,36 @@
 
 using namespace WebCore;
 
+#ifndef ENABLE_GLNEXUS_SUPPORT
 #if USE(ACCELERATED_COMPOSITING) && USE(TEXTURE_MAPPER)
 #include "texmap/TextureMapper.h"
 #endif
+#endif //ENABLE_GLNEXUS_SUPPORT
 
 //////////////////////////////////////////
 // ImageWYMediaPlayer class
 //////////////////////////////////////////
+
 #include "GOwnPtr.h"
 #include <wtf/PassRefPtr.h>
 
+#ifndef ENABLE_GLNEXUS_SUPPORT
 #if PLATFORM(CAIRO)
 #include <cairo.h>
 #include <cairo-directfb.h>
 #endif
+#endif // ENABLE_GLNEXUS_SUPPORT
 
 #if PLATFORM(QT)
 #include <QPixmap>
+#endif
+
+#ifdef ENABLE_GLNEXUS_SUPPORT
+#include <GLES2/gl2.h>
+#include <QGLContext>
+#else
+
+#if PLATFORM(QT)
 #include <QImageReader>
 #endif
 
@@ -99,15 +112,26 @@ ImageWYMediaPlayer::~ImageWYMediaPlayer()
 // ImageWYMediaPlayer class
 //////////////////////////////////////////
 
+#endif // ENABLE_GLNEXUS_SUPPORT
+
 
 CWYMediaPlayerLibrary               g_libraryWYMediaPlayer;
 WYSmartPtr<IFactory>                g_spWYMediaPlayerFactory;
 WYSmartPtr<IMediaPlayersManager>    g_spMediaPlayersManager;
+#ifdef ENABLE_GLNEXUS_SUPPORT
+bool                                g_bTraceEnabled = true;
+#else
 bool                                g_bTraceEnabled = false;
+#endif // ENABLE_GLNEXUS_SUPPORT
 bool                                g_bPreserveAspectRatio = true;
 
 bool MediaPlayerPrivateWYMediaPlayer::doWYMediaPlayerInit()
 {
+    char*   l_pTraceEnabled = getenv("html5video_debug");
+    g_bTraceEnabled = (l_pTraceEnabled != NULL);
+    char*   l_pPreserveAspectRatio = getenv("html5video_preserveaspect");
+    g_bPreserveAspectRatio = (l_pPreserveAspectRatio != NULL) ? std::string(l_pPreserveAspectRatio) != "false" : true;
+
     WY_TRACK(MediaPlayerPrivateWYMediaPlayer);
     if (!g_libraryWYMediaPlayer.isLoaded())
     {
@@ -145,11 +169,6 @@ bool MediaPlayerPrivateWYMediaPlayer::doWYMediaPlayerInit()
             return false;
         }
     }
-
-    char*   l_pTraceEnabled = getenv("html5video_debug");
-    g_bTraceEnabled = (l_pTraceEnabled != NULL);
-    char*   l_pPreserveAspectRatio = getenv("html5video_preserveaspect");
-    g_bPreserveAspectRatio = (l_pPreserveAspectRatio != NULL) ? std::string(l_pPreserveAspectRatio) != "false" : true;
 
     return true;
 }
@@ -228,11 +247,14 @@ MediaPlayer::SupportsType MediaPlayerPrivateWYMediaPlayer::supportsType(const St
 MediaPlayerPrivateWYMediaPlayer::MediaPlayerPrivateWYMediaPlayer(MediaPlayer* player)
     : m_webCorePlayer(player)
     , m_threadCreator(currentThread())
+#ifndef ENABLE_GLNEXUS_SUPPORT
 #if PLATFORM(QT)
     , m_pVideoItem(NULL)
 #endif
+#endif // ENABLE_GLNEXUS_SUPPORT
 {
     WY_TRACK(MediaPlayerPrivateWYMediaPlayer);
+    WYTRACE_DEBUG("this : %p\n", this);
     init();
 }
 
@@ -240,6 +262,9 @@ MediaPlayerPrivateWYMediaPlayer::~MediaPlayerPrivateWYMediaPlayer()
 {
     WY_TRACK(MediaPlayerPrivateWYMediaPlayer);
     cancelCallOnMainThread(updateStatesCallback, this);
+#ifdef ENABLE_GLNEXUS_SUPPORT
+    cancelCallOnMainThread(differedRepaint, this);
+#endif // ENABLE_GLNEXUS_SUPPORT
     uninit();
 }
 
@@ -257,12 +282,14 @@ bool MediaPlayerPrivateWYMediaPlayer::init()
         WYTRACE_ERROR("(!doWYMediaPlayerInit())\n");
         return false;
     }
+#ifndef ENABLE_GLNEXUS_SUPPORT
     DirectFBCreate(&m_pDirectFB);
     if (m_pDirectFB == NULL)
     {
         WYTRACE_ERROR("(m_pDirectFB == NULL)\n");
         return false;
     }
+#endif // ENABLE_GLNEXUS_SUPPORT
     if (m_spMediaPlayer == NULL)
     {
         // Get First Player
@@ -306,9 +333,11 @@ bool MediaPlayerPrivateWYMediaPlayer::init()
     m_fChangedVolume = 0.0f;
     m_bMutedValue = false;
 
+#ifndef ENABLE_GLNEXUS_SUPPORT
 #if PLATFORM(QT)
     m_pVideoItem = new QWYVideoItem(this);
 #endif
+#endif // ENABLE_GLNEXUS_SUPPORT
 
     return true;
 }
@@ -317,6 +346,7 @@ bool MediaPlayerPrivateWYMediaPlayer::uninit()
 {
     WY_TRACK(MediaPlayerPrivateWYMediaPlayer);
 
+#ifndef ENABLE_GLNEXUS_SUPPORT
 #if PLATFORM(QT)
     if (m_pVideoItem)
     {
@@ -324,6 +354,7 @@ bool MediaPlayerPrivateWYMediaPlayer::uninit()
         m_pVideoItem = NULL;
     }
 #endif
+#endif // ENABLE_GLNEXUS_SUPPORT
 
     m_fChangedVolume = 0.0f;
     m_bMutedValue = false;
@@ -346,11 +377,13 @@ bool MediaPlayerPrivateWYMediaPlayer::uninit()
     g_spMediaPlayersManager->deletePlayer(m_spMediaPlayer);
     m_spMediaPlayer->release();
 
+#ifndef ENABLE_GLNEXUS_SUPPORT
     if (m_pDirectFB)
     {
         m_pDirectFB->Release(m_pDirectFB);
         m_pDirectFB = NULL;
     }
+#endif // ENABLE_GLNEXUS_SUPPORT
 
     return true;
 }
@@ -832,9 +865,25 @@ PlatformMedia MediaPlayerPrivateWYMediaPlayer::platformMedia() const
 
 void MediaPlayerPrivateWYMediaPlayer::paintCurrentFrameInContext(GraphicsContext* c, const IntRect& r)
 {
-//    printf("%s:%s():%d : MediaPlayerPrivateWYMediaPlayer::paintCurrentFrameInContext()\n", __FILE__, __FUNCTION__, __LINE__);
     paint(c, r);
 }
+
+#ifdef ENABLE_GLNEXUS_SUPPORT
+bool MediaPlayerPrivateWYMediaPlayer::supportsAcceleratedRendering() const
+{
+    return false;
+}
+
+void MediaPlayerPrivateWYMediaPlayer::acceleratedRenderingStateChanged()
+{
+}
+
+PlatformLayer* MediaPlayerPrivateWYMediaPlayer::platformLayer() const
+{
+    return NULL;
+}
+
+#else // ENABLE_GLNEXUS_SUPPORT
 
 #if USE(ACCELERATED_COMPOSITING) && USE(TEXTURE_MAPPER)
 void MediaPlayerPrivateWYMediaPlayer::paintToTextureMapper(TextureMapper* textureMapper, const FloatRect& targetRect, const TransformationMatrix& matrix, float opacity, BitmapTexture*) const
@@ -972,17 +1021,42 @@ bool MediaPlayerPrivateWYMediaPlayer::renderVideoFrame(GraphicsContext* c, const
     return false;
 }
 
+#endif // ENABLE_GLNEXUS_SUPPORT
 
 void MediaPlayerPrivateWYMediaPlayer::paint(GraphicsContext* c, const IntRect& r)
 {
-    WYTRACE_DEBUG("Paint area : (%d, %d) - (%d x %d)\n", r.x(), r.y(), r.width(), r.height());
+    WYTRACE_DEBUG("Paint area : (%d, %d) - (%d x %d) disabled %i visible %i\n", r.x(), r.y(), r.width(), r.height(), c->paintingDisabled(), m_webCorePlayer->visible());
     if (c->paintingDisabled())
         return;
 
     if (!m_webCorePlayer->visible())
         return;
 
+#ifndef ENABLE_GLNEXUS_SUPPORT
     renderVideoFrame(c, r);
+#else // ENABLE_GLNEXUS_SUPPORT
+    QPainter *l_pPainter = static_cast<QPainter*>(c->platformContext());
+
+    if (m_spWebkitMediaPlayer != NULL)
+    {
+        GLuint textureId = 0;
+        GLuint* pTex = &textureId;
+        bool result = m_spWebkitMediaPlayer->videoFrame((void**)&pTex, 0,0,0,0);
+        if (result) {
+            l_pPainter->save();
+            l_pPainter->scale(1.0, -1.0);
+            QGLContext *l_pContext = const_cast<QGLContext*>(QGLContext::currentContext());
+            l_pContext->drawTexture(QRectF(r.x(),-r.y()-r.height(), r.width(), r.height()), textureId, GL_TEXTURE_2D);
+            l_pPainter->restore();
+        }
+        else
+        {
+            l_pPainter->fillRect ( QRectF(r.x(), r.y(), r.height(), r.width()), QColor(0,0,0,0));
+            WYTRACE_DEBUG("Paint area returned false\n");
+        }
+    }
+    WYTRACE_DEBUG("OUT Paint area : (%d, %d) - (%d x %d) disabled %i visible %i\n", r.x(), r.y(), r.width(), r.height(), c->paintingDisabled(), m_webCorePlayer->visible());
+#endif // ENABLE_GLNEXUS_SUPPORT
 }
 
 void MediaPlayerPrivateWYMediaPlayer::updateStatesCallback(void* p_thiz)
@@ -1180,6 +1254,44 @@ void MediaPlayerPrivateWYMediaPlayer::durationChanged()
     }
 }
 
+#ifdef ENABLE_GLNEXUS_SUPPORT
+void MediaPlayerPrivateWYMediaPlayer::differedRepaint(void *p_thiz)
+{
+    WY_TRACK(MediaPlayerPrivateWYMediaPlayer);
+    MediaPlayerPrivateWYMediaPlayer* thiz = static_cast<MediaPlayerPrivateWYMediaPlayer*>(p_thiz);
+    if (thiz)
+        thiz->doRepaint();
+}
+
+void MediaPlayerPrivateWYMediaPlayer::doRepaint()
+{
+    WY_TRACK(MediaPlayerPrivateWYMediaPlayer);
+//  static bool ls_bFirstFrame = true;
+//    if (ls_bFirstFrame)
+//    {
+//        if (m_webCorePlayer) m_webCorePlayer->firstVideoFrameAvailable();
+//        ls_bFirstFrame = false;
+//    }
+//    else
+//    {
+        if (m_webCorePlayer) m_webCorePlayer->repaint();
+//    }
+}
+
+void MediaPlayerPrivateWYMediaPlayer::repaint()
+{
+    WY_TRACK(MediaPlayerPrivateWYMediaPlayer);
+    if (m_threadCreator == currentThread())
+    {
+        doRepaint();
+    }
+    else
+    {
+        callOnMainThread(differedRepaint, this);
+    }
+}
+#else  // ENABLE_GLNEXUS_SUPPORT
+
 #if PLATFORM(QT)
 void MediaPlayerPrivateWYMediaPlayer::onRepaintAsked()
 {
@@ -1191,13 +1303,14 @@ void MediaPlayerPrivateWYMediaPlayer::repaint()
 //    printf("%s:%s():%d : MediaPlayerPrivateWYMediaPlayer::repaint()\n", __FILE__, __FUNCTION__, __LINE__);
     if (m_pVideoItem) m_pVideoItem->notifyRepaint();
 }
-#else
+#else // PLATFORM(QT)
 void MediaPlayerPrivateWYMediaPlayer::repaint()
 {
 //    printf("%s:%s():%d : MediaPlayerPrivateWYMediaPlayer::repaint()\n", __FILE__, __FUNCTION__, __LINE__);
     if (m_webCorePlayer) m_webCorePlayer->repaint();
 }
-#endif
+#endif // PLATFORM(QT)
+#endif // ENABLE_GLNEXUS_SUPPORT
 
 float MediaPlayerPrivateWYMediaPlayer::rate()
 {

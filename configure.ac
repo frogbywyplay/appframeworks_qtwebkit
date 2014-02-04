@@ -487,6 +487,16 @@ if test "$enable_dbus_bridge" = "yes"; then
     AC_DEFINE([ENABLE_DBUS_BRIDGE], [1], [Needed for dbus-bridge application])
 fi
 
+# glnexus USE flag
+AC_MSG_CHECKING([Needed for opengl over nexus support (default : disabled)])
+AC_ARG_ENABLE(glnexus,
+              AC_HELP_STRING([--enable-glnexus],
+                             [Needed for opengl over nexus support (default : disabled)]),
+              [],[enable_glnexus="no"])
+AC_MSG_RESULT([$enable_glnexus])
+if test "$enable_glnexus" = "yes"; then
+    AC_DEFINE([ENABLE_GLNEXUS_SUPPORT], [1], [Needed for opengl over nexus support])
+fi
 
 # farstream-0.1 depends on gstreamer 0.10 currently. Disable
 # media_stream if gstreamer 0.11 build support is enabled.

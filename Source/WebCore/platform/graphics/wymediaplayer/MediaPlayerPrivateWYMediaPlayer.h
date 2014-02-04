@@ -20,10 +20,13 @@
 #include "Timer.h"
 #include "BitmapImage.h"
 
+#ifndef ENABLE_GLNEXUS_SUPPORT
 #include <directfb/directfb.h>
+#endif // ENABLE_GLNEXUS_SUPPORT
 
 #include <wymediaplayerhelper/wymediaplayerhelper.h>
 
+#ifndef ENABLE_GLNEXUS_SUPPORT
 #if USE(ACCELERATED_COMPOSITING) && USE(TEXTURE_MAPPER)
 #include "TextureMapper.h"
 #endif
@@ -31,32 +34,49 @@
 #if PLATFORM(QT)
 #include "QWYVideoItem.h"
 #endif
+#endif // ENABLE_GLNEXUS_SUPPORT
 
 namespace WebCore {
+
+#ifdef ENABLE_GLNEXUS_SUPPORT
+class WMPHLayer;
+#endif
 
 class MediaPlayerPrivateWYMediaPlayer :
     public MediaPlayerPrivateInterface,
     public IWebkitMediaPlayerEventSink
+#ifndef ENABLE_GLNEXUS_SUPPORT
 #if USE(ACCELERATED_COMPOSITING) && USE(TEXTURE_MAPPER)
         , public TextureMapperPlatformLayer
 #endif
+#endif // ENABLE_GLNEXUS_SUPPORT
 {
 public:
     MediaPlayerPrivateWYMediaPlayer(MediaPlayer* player);
     virtual ~MediaPlayerPrivateWYMediaPlayer();
 
+#ifndef ENABLE_GLNEXUS_SUPPORT
 #if PLATFORM(QT)
     friend class QWYVideoItem;
 private:
         void onRepaintAsked();
 #endif
+#endif // ENABLE_GLNEXUS_SUPPORT
 
 private:
     MediaPlayer* m_webCorePlayer;
 
+#ifdef ENABLE_GLNEXUS_SUPPORT
+#if USE(ACCELERATED_COMPOSITING)
+    WMPHLayer *m_layer;
+#endif
+#endif // ENABLE_GLNEXUS_SUPPORT
+
     WYSmartPtr<IMediaPlayer>            m_spMediaPlayer;
     WYSmartPtr<IWebkitMediaPlayer>      m_spWebkitMediaPlayer;
+#ifndef ENABLE_GLNEXUS_SUPPORT
     IDirectFB*                          m_pDirectFB;
+#endif // ENABLE_GLNEXUS_SUPPORT
 
     bool    m_bNetworkStateChanged;
     bool    m_bReadyStateChanged;
@@ -73,23 +93,31 @@ private:
     float   m_fChangedVolume;
     bool    m_bMutedValue;
 
+#ifndef ENABLE_GLNEXUS_SUPPORT
 #if PLATFORM(QT)
     QWYVideoItem*   m_pVideoItem;
 #endif
+#endif // ENABLE_GLNEXUS_SUPPORT
 
 protected:
     virtual bool init();
     virtual bool uninit();
 
+#ifndef ENABLE_GLNEXUS_SUPPORT
             bool renderVideoFrame(GraphicsContext* c, const IntRect& r) const;
-
             RefPtr<BitmapImage> bitmapImageFromDirectFBSurface(IDirectFBSurface* p_pDirectFBSurface) const;
+#else // ENABLE_GLNEXUS_SUPPORT
+            void doRepaint();
+#endif // ENABLE_GLNEXUS_SUPPORT
 
             void updateStates();
 
 public:
             // player status change mng
             static void updateStatesCallback(void* thiz);
+#ifdef ENABLE_GLNEXUS_SUPPORT
+            static void differedRepaint(void *thiz);
+#endif // ENABLE_GLNEXUS_SUPPORT
 
 public:
     static  PassOwnPtr<MediaPlayerPrivateInterface>    create(MediaPlayer* player);
@@ -106,10 +134,14 @@ public:
     virtual void prepareToPlay();
     virtual PlatformMedia platformMedia() const;
 #if USE(ACCELERATED_COMPOSITING)
+#ifndef ENABLE_GLNEXUS_SUPPORT
     virtual PlatformLayer* platformLayer() const { return 0; }
 #if USE(TEXTURE_MAPPER)
     // Const-casting here is safe, since all of TextureMapperPlatformLayer's functions are const.g
     virtual void paintToTextureMapper(TextureMapper*, const FloatRect& targetRect, const TransformationMatrix&, float opacity, BitmapTexture* mask) const;
+#else // ENABLE_GLNEXUS_SUPPORT
+    virtual PlatformLayer* platformLayer() const;
+#endif // ENABLE_GLNEXUS_SUPPORT
 #endif
 #endif
 
@@ -169,6 +201,7 @@ public:
     virtual bool canLoadPoster() const;
     virtual void setPoster(const String&);
 
+#ifndef ENABLE_GLNEXUS_SUPPORT
 #if ENABLE(PLUGIN_PROXY_FOR_VIDEO)
     virtual void deliverNotification(MediaPlayerProxyNotificationType) = 0;
     virtual void setMediaPlayerProxy(WebMediaPlayerProxy*) = 0;
@@ -176,12 +209,24 @@ public:
     virtual void enterFullscreen() { }
     virtual void exitFullscreen() { }
 #endif
+#endif // ENABLE_GLNEXUS_SUPPORT
 
 #if USE(ACCELERATED_COMPOSITING)
+#ifndef ENABLE_GLNEXUS_SUPPORT
+
     // whether accelerated rendering is supported by the media engine for the current media.
     virtual bool supportsAcceleratedRendering() const { return false; }
     // called when the rendering system flips the into or out of accelerated rendering mode.
     virtual void acceleratedRenderingStateChanged() { }
+
+#else // ENABLE_GLNEXUS_SUPPORT
+
+    // whether accelerated rendering is supported by the media engine for the current media.
+    virtual bool supportsAcceleratedRendering() const;
+     // called when the rendering system flips the into or out of accelerated rendering mode.
+    virtual void acceleratedRenderingStateChanged();
+
+#endif // ENABLE_GLNEXUS_SUPPORT
 #endif
 
     virtual bool hasSingleSecurityOrigin() const;
