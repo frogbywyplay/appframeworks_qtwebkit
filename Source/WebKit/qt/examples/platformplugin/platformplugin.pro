@@ -21,7 +21,7 @@ load(mobilityconfig, true)
     }
 }
 
-DESTDIR = $$[QT_INSTALL_PLUGINS]/webkit
+DESTDIR = $$(D)/$$[QT_INSTALL_PLUGINS]/webkit
 
 SOURCES += \
     WebPlugin.cpp \
