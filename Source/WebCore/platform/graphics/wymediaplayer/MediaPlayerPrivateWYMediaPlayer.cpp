@@ -967,10 +967,6 @@ bool MediaPlayerPrivateWYMediaPlayer::renderVideoFrame(GraphicsContext* c, const
             l_pDirectFBSurface = NULL;
             return true;
         }
-        else
-        {
-            WYTRACE_ERROR("(l_pDirectFBSurface == NULL)\n");
-        }
     }
 
     return false;
