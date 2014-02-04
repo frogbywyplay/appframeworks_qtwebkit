@@ -28,7 +28,7 @@
 #include <QtNetwork/qnetworkaccessmanager.h>
 #include "qwebkitglobal.h"
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0) && 0
 #include <QtScript/qscriptengine.h>
 #endif
 
@@ -124,7 +124,7 @@ private:
     ~QWebFrame();
 
 public:
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0) || 1
     enum ValueOwnership {
         QtOwnership,
         ScriptOwnership,
@@ -139,7 +139,7 @@ public:
     void setHtml(const QString &html, const QUrl &baseUrl = QUrl());
     void setContent(const QByteArray &data, const QString &mimeType = QString(), const QUrl &baseUrl = QUrl());
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0) || 1
     void addToJavaScriptWindowObject(const QString &name, QObject *object, ValueOwnership ownership = QtOwnership);
 #else
     void addToJavaScriptWindowObject(const QString &name, QObject *object);

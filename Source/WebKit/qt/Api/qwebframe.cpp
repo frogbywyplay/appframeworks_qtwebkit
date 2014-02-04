@@ -517,6 +517,7 @@ QWebFrame::~QWebFrame()
     delete d;
 }
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0) && 0
 /*!
     Make \a object available under \a name from within the frame's JavaScript
     context. The \a object will be inserted as a child of the frame's window
@@ -538,6 +539,7 @@ void QWebFrame::addToJavaScriptWindowObject(const QString &name, QObject *object
 {
     addToJavaScriptWindowObject(name, object, QScriptEngine::QtOwnership);
 }
+#endif
 
 /*!
     \fn void QWebFrame::addToJavaScriptWindowObject(const QString &name, QObject *object, QScriptEngine::ValueOwnership own)
@@ -559,7 +561,7 @@ void QWebFrame::addToJavaScriptWindowObject(const QString &name, QObject *object
 
     The ownership of \a object is specified using \a own.
 */
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0) || 1
 void QWebFrame::addToJavaScriptWindowObject(const QString &name, QObject *object, ValueOwnership ownership)
 #else
 void QWebFrame::addToJavaScriptWindowObject(const QString &name, QObject *object, QScriptEngine::ValueOwnership ownership)
