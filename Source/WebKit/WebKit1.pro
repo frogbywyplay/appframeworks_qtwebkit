@@ -98,7 +98,7 @@ HEADERS += \
 
 haveQt(5): contains(QT_CONFIG,accessibility) {
     SOURCES += $$PWD/qt/Api/qwebviewaccessible.cpp
-    HEADERS += $$PWD/qt/Api/qwebviewaccessible_p.h 
+    HEADERS += $$PWD/qt/Api/qwebviewaccessible_p.h
 }
 
 INCLUDEPATH += \
@@ -106,6 +106,13 @@ INCLUDEPATH += \
     $$PWD/qt/WebCoreSupport
 
 contains(DEFINES, ENABLE_VIDEO=1) {
+
+    DEFINES -= WTF_USE_GSTREAMER=1
+    DEFINES += WTF_USE_GSTREAMER=0
+    DEFINES -= WTF_USE_QT_MULTIMEDIA=1
+    DEFINES += WTF_USE_QT_MULTIMEDIA=0
+    DEFINES += WTF_USE_WYMEDIAPLAYER=1
+
     !contains(DEFINES, WTF_USE_QTKIT=1):!contains(DEFINES, WTF_USE_GSTREAMER=1):contains(DEFINES, WTF_USE_QT_MULTIMEDIA=1) {
         HEADERS += $$PWD/qt/WebCoreSupport/FullScreenVideoWidget.h
         SOURCES += $$PWD/qt/WebCoreSupport/FullScreenVideoWidget.cpp

@@ -8,6 +8,8 @@
 #ifndef MEDIAPLAYERPRIVATEWYMEDIAPLAYER_H_
 #define MEDIAPLAYERPRIVATEWYMEDIAPLAYER_H_
 
+#include "config.h"
+
 #if ENABLE(VIDEO)
 
 #if USE(WYMEDIAPLAYER)
@@ -21,15 +23,32 @@
 
 #include <wymediaplayerhelper/wymediaplayerhelper.h>
 
+#if USE(ACCELERATED_COMPOSITING) && USE(TEXTURE_MAPPER)
+#include "TextureMapper.h"
+#endif
+
+#if PLATFORM(QT)
+#include "QWYVideoItem.h"
+#endif
+
 namespace WebCore {
 
 class MediaPlayerPrivateWYMediaPlayer :
     public MediaPlayerPrivateInterface,
     public IWebkitMediaPlayerEventSink
+#if USE(ACCELERATED_COMPOSITING) && USE(TEXTURE_MAPPER)
+        , public TextureMapperPlatformLayer
+#endif
 {
 public:
     MediaPlayerPrivateWYMediaPlayer(MediaPlayer* player);
     virtual ~MediaPlayerPrivateWYMediaPlayer();
+
+#if PLATFORM(QT)
+    friend class QWYVideoItem;
+private:
+        void onRepaintAsked();
+#endif
 
 private:
     MediaPlayer* m_webCorePlayer;
@@ -55,15 +74,20 @@ private:
     float   m_fChangedVolume;
     bool    m_bMutedValue;
 
+#if PLATFORM(QT)
+    QWYVideoItem*   m_pVideoItem;
+#endif
+
 protected:
     virtual bool init();
     virtual bool uninit();
 
             void fillTimerFired(Timer<MediaPlayerPrivateWYMediaPlayer>*);
+            bool renderVideoFrame(GraphicsContext* c, const IntRect& r) const;
 
             void updateStates();
 public:
-    static  MediaPlayerPrivateInterface*    create(MediaPlayer* player);
+    static  PassOwnPtr<MediaPlayerPrivateInterface>    create(MediaPlayer* player);
     static  bool                            isAvailable();
     static  bool                            doWYMediaPlayerInit();
     static  void                            getSupportedTypes(HashSet<String>&);
@@ -78,6 +102,10 @@ public:
     virtual PlatformMedia platformMedia() const;
 #if USE(ACCELERATED_COMPOSITING)
     virtual PlatformLayer* platformLayer() const { return 0; }
+#if USE(TEXTURE_MAPPER)
+    // Const-casting here is safe, since all of TextureMapperPlatformLayer's functions are const.g
+    virtual void paintToTextureMapper(TextureMapper*, const FloatRect& targetRect, const TransformationMatrix&, float opacity, BitmapTexture* mask) const;
+#endif
 #endif
 
     virtual void play();

@@ -379,7 +379,7 @@ SOURCES += \
     dom/DeviceMotionData.cpp \
     dom/DeviceMotionEvent.cpp \
     dom/DeviceOrientationController.cpp \
-    dom/DeviceOrientationData.cpp \    
+    dom/DeviceOrientationData.cpp \
     dom/DeviceOrientationEvent.cpp \
     dom/Document.cpp \
     dom/DocumentEventQueue.cpp \
@@ -3302,7 +3302,18 @@ contains(DEFINES, ENABLE_VIDEO=1) {
             platform/graphics/gstreamer/WebKitWebSourceGStreamer.cpp \
             platform/graphics/gstreamer/PlatformVideoWindowQt.cpp \
             platform/graphics/gstreamer/ImageGStreamerQt.cpp
-
+    } else: contains(DEFINES, WTF_USE_WYMEDIAPLAYER=1) {
+        HEADERS += \
+            platform/graphics/wymediaplayer/debug.h \
+            platform/graphics/wymediaplayer/Library.h \
+            platform/graphics/wymediaplayer/MediaPlayerPrivateWYMediaPlayer.h \
+            platform/graphics/wymediaplayer/WYMediaPlayerLibrary.h \
+            platform/graphics/wymediaplayer/QWYVideoItem.h
+        SOURCES += \
+            platform/graphics/wymediaplayer/Library.cpp \
+            platform/graphics/wymediaplayer/MediaPlayerPrivateWYMediaPlayer.cpp \
+            platform/graphics/wymediaplayer/WYMediaPlayerLibrary.cpp \
+            platform/graphics/wymediaplayer/QWYVideoItem.cpp
     } else:contains(DEFINES, WTF_USE_QT_MULTIMEDIA=1) {
         HEADERS += \
             platform/graphics/qt/MediaPlayerPrivateQt.h

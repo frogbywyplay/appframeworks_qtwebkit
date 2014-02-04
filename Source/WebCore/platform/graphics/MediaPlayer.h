@@ -20,7 +20,7 @@
  * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
  * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #ifndef MediaPlayer_h
@@ -78,7 +78,8 @@ struct PlatformMedia {
         ChromiumMediaPlayerType,
         QtMediaPlayerType,
         AVFoundationMediaPlayerType,
-        AVFoundationCFMediaPlayerType
+        AVFoundationCFMediaPlayerType,
+        WYPLAYMediaPlayerType,
     } type;
 
     union {
@@ -90,6 +91,7 @@ struct PlatformMedia {
         MediaPlayerPrivateInterface* qtMediaPlayer;
         AVPlayer* avfMediaPlayer;
         AVCFPlayer* avcfMediaPlayer;
+        MediaPlayerPrivateInterface* wyplayMediaPlayer;
     } media;
 };
 
@@ -166,7 +168,7 @@ public:
 
     // A characteristic of the media file, eg. video, audio, closed captions, etc, has changed.
     virtual void mediaPlayerCharacteristicChanged(MediaPlayer*) { }
-    
+
 #if USE(ACCELERATED_COMPOSITING)
     // whether the rendering system can accelerate the display of this MediaPlayer.
     virtual bool mediaPlayerRenderingCanBeAccelerated(MediaPlayer*) { return false; }
@@ -266,7 +268,7 @@ public:
 
     void prepareToPlay();
     void play();
-    void pause();    
+    void pause();
 
 #if ENABLE(MEDIA_SOURCE)
     enum AddIdStatus { Ok, NotSupported, ReachedIdLimit };
@@ -306,7 +308,7 @@ public:
     float rate() const;
     void setRate(float);
 
-    bool preservesPitch() const;    
+    bool preservesPitch() const;
     void setPreservesPitch(bool);
 
     PassRefPtr<TimeRanges> buffered();
@@ -324,7 +326,7 @@ public:
     bool hasClosedCaptions() const;
     void setClosedCaptionsVisible(bool closedCaptionsVisible);
 
-    bool autoplay() const;    
+    bool autoplay() const;
     void setAutoplay(bool);
 
     void paint(GraphicsContext*, const IntRect&);
