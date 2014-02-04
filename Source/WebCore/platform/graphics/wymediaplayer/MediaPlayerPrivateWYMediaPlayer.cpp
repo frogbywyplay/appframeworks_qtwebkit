@@ -265,11 +265,13 @@ bool MediaPlayerPrivateWYMediaPlayer::init()
     if (m_spMediaPlayer == NULL)
     {
         // Get First Player
-        if (!g_spMediaPlayersManager->createPlayer(&m_spMediaPlayer))
+        IMediaPlayer* l_pMediaPlayer;
+        if (!g_spMediaPlayersManager->createPlayer(&l_pMediaPlayer))
         {
             WYTRACE_ERROR("(!g_spMediaPlayersManager->createPlayer(&m_spMediaPlayer))\n");
             return false;
         }
+        m_spMediaPlayer = l_pMediaPlayer;
         if (m_spMediaPlayer == NULL)
         {
             WYTRACE_ERROR("(m_spMediaPlayer == NULL)\n");
@@ -343,7 +345,8 @@ bool MediaPlayerPrivateWYMediaPlayer::uninit()
         m_spWebkitMediaPlayer->setEventSink(NULL);
     }
     m_spWebkitMediaPlayer.release();
-    m_spMediaPlayer.release();
+    g_spMediaPlayersManager->deletePlayer(m_spMediaPlayer);
+    m_spMediaPlayer->release();
 
     if (m_pDirectFB)
     {
