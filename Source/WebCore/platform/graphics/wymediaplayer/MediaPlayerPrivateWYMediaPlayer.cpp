@@ -15,6 +15,7 @@
 #include "debug.h"
 #include "TimeRanges.h"
 #include "GraphicsContext.h"
+#include "../FrameView.h"
 
 using namespace WebCore;
 
@@ -883,7 +884,9 @@ bool MediaPlayerPrivateWYMediaPlayer::renderVideoFrame(GraphicsContext* c, const
 {
     IDirectFBSurface*   l_pDirectFBSurface = NULL;
 
-    if (m_spWebkitMediaPlayer->videoFrame(&l_pDirectFBSurface, r.x(), r.y(), r.width(), r.height()))
+    IntRect cTw(m_webCorePlayer->frameView()->contentsToWindow(r));
+
+    if (m_spWebkitMediaPlayer->videoFrame(&l_pDirectFBSurface, cTw.x(), cTw.y(), cTw.width(), cTw.height()))
     {
         FloatRect rect(r.x(), r.y(), r.width(), r.height());
         c->clearRect(rect);
