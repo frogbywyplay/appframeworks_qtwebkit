@@ -148,8 +148,7 @@ bool MediaPlayerPrivateWYMediaPlayer::doWYMediaPlayerInit()
     char*   l_pTraceEnabled = getenv("html5video_debug");
     g_bTraceEnabled = (l_pTraceEnabled != NULL);
     char*   l_pPreserveAspectRatio = getenv("html5video_preserveaspect");
-    std::string l_strPreserveAspectRatio = (l_pPreserveAspectRatio) ? l_pPreserveAspectRatio : "";
-    g_bPreserveAspectRatio = (l_strPreserveAspectRatio.compare("0"));
+    g_bPreserveAspectRatio = (l_pPreserveAspectRatio != NULL) ? std::string(l_pPreserveAspectRatio) != "false" : true;
 
     return true;
 }
