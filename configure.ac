@@ -484,7 +484,7 @@ AC_ARG_ENABLE(dbus_bridge,
               [],[enable_dbus_bridge="no"])
 AC_MSG_RESULT([$enable_dbus_bridge])
 if test "$enable_dbus_bridge" = "yes"; then
-    AC_DEFINE([ENABLE_DEBUS_BRIDGE], [1], [Needed for dbus-bridge application])
+    AC_DEFINE([ENABLE_DBUS_BRIDGE], [1], [Needed for dbus-bridge application])
 fi
 
 

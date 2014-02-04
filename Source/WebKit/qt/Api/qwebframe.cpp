@@ -100,7 +100,7 @@
 #include <qregion.h>
 #include <qnetworkrequest.h>
 
-#ifdef ENABLE_DEBUS_BRIDGE
+#ifdef ENABLE_DBUS_BRIDGE
 #include <JavaScriptCore/APICast.h>
 #include <JavaScriptCore/API/JSContextRef.h>
 #endif
@@ -594,7 +594,7 @@ void QWebFrame::addToJavaScriptWindowObject(const QString &name, QObject *object
     JSC::ExecState* exec = window->globalExec();
     JSC::JSLockHolder lock(exec);
 
-#ifdef ENABLE_DEBUS_BRIDGE
+#ifdef ENABLE_DBUS_BRIDGE
     // Do a call to JSContextGetGlobalObject(context); to force linker to add Needed JavascriptCore symbols for browser-dbus-bridge
     JSContextRef context = ::toRef(exec);
     JSContextGetGlobalObject(context);
