@@ -20,7 +20,7 @@
  * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
  * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "config.h"
@@ -47,6 +47,10 @@
 #if PLATFORM(QT)
 #include <QtGlobal>
 #endif
+
+#if USE(WYMEDIAPLAYER)
+#include "wymediaplayer/MediaPlayerPrivateWYMediaPlayer.h"
+#else
 
 #if USE(GSTREAMER)
 #include "MediaPlayerPrivateGStreamer.h"
@@ -81,6 +85,8 @@
 #define PlatformMediaEngineClassName MediaPlayerPrivate
 #endif
 
+#endif // USE(WYMEDIAPLAYER)
+
 namespace WebCore {
 
 const PlatformMedia NoPlatformMedia = { PlatformMedia::None, {0} };
@@ -96,7 +102,7 @@ public:
 
     virtual void prepareToPlay() { }
     virtual void play() { }
-    virtual void pause() { }    
+    virtual void pause() { }
 
     virtual PlatformMedia platformMedia() const { return NoPlatformMedia; }
 #if USE(ACCELERATED_COMPOSITING)
@@ -170,9 +176,9 @@ public:
 #endif
 };
 
-static PassOwnPtr<MediaPlayerPrivateInterface> createNullMediaPlayer(MediaPlayer* player) 
-{ 
-    return adoptPtr(new NullMediaPlayerPrivate(player)); 
+static PassOwnPtr<MediaPlayerPrivateInterface> createNullMediaPlayer(MediaPlayer* player)
+{
+    return adoptPtr(new NullMediaPlayerPrivate(player));
 }
 
 
@@ -205,13 +211,17 @@ static void addMediaEngine(CreateMediaEnginePlayer, MediaEngineSupportedTypes, M
 static MediaPlayerFactory* bestMediaEngineForTypeAndCodecs(const String& type, const String& codecs, const String& keySystem, const KURL&, MediaPlayerFactory* current = 0);
 static MediaPlayerFactory* nextMediaEngine(MediaPlayerFactory* current);
 
-static Vector<MediaPlayerFactory*>& installedMediaEngines() 
+static Vector<MediaPlayerFactory*>& installedMediaEngines()
 {
     DEFINE_STATIC_LOCAL(Vector<MediaPlayerFactory*>, installedEngines, ());
     static bool enginesQueried = false;
 
     if (!enginesQueried) {
         enginesQueried = true;
+
+#if USE(WYMEDIAPLAYER)
+        MediaPlayerPrivateWYMediaPlayer::registerMediaEngine(addMediaEngine);
+#else
 
 #if USE(AVFOUNDATION)
         if (Settings::isAVFoundationEnabled()) {
@@ -226,6 +236,7 @@ static Vector<MediaPlayerFactory*>& installedMediaEngines()
 #if defined(PlatformMediaEngineClassName)
         PlatformMediaEngineClassName::registerMediaEngine(addMediaEngine);
 #endif
+#endif // USE(WYMEDIAPLAYER)
     }
 
     return installedEngines;
@@ -268,8 +279,8 @@ static MediaPlayerFactory* bestMediaEngineForTypeAndCodecs(const String& type, c
     if (engines.isEmpty())
         return 0;
 
-    // 4.8.10.3 MIME types - In the absence of a specification to the contrary, the MIME type "application/octet-stream" 
-    // when used with parameters, e.g. "application/octet-stream;codecs=theora", is a type that the user agent knows 
+    // 4.8.10.3 MIME types - In the absence of a specification to the contrary, the MIME type "application/octet-stream"
+    // when used with parameters, e.g. "application/octet-stream;codecs=theora", is a type that the user agent knows
     // it cannot render.
     if (type == applicationOctetStream()) {
         if (!codecs.isEmpty())
@@ -307,11 +318,11 @@ static MediaPlayerFactory* nextMediaEngine(MediaPlayerFactory* current)
     if (engines.isEmpty())
         return 0;
 
-    if (!current) 
+    if (!current)
         return engines.first();
 
     size_t currentIndex = engines.find(current);
-    if (currentIndex == WTF::notFound || currentIndex + 1 >= engines.size()) 
+    if (currentIndex == WTF::notFound || currentIndex + 1 >= engines.size())
         return 0;
 
     return engines[currentIndex + 1];
@@ -445,12 +456,12 @@ bool MediaPlayer::canLoadPoster() const
 void MediaPlayer::setPoster(const String& url)
 {
     m_private->setPoster(url);
-}    
+}
 
 void MediaPlayer::cancelLoad()
 {
     m_private->cancelLoad();
-}    
+}
 
 void MediaPlayer::prepareToPlay()
 {
@@ -668,7 +679,7 @@ float MediaPlayer::rate() const
 void MediaPlayer::setRate(float rate)
 {
     m_rate = rate;
-    m_private->setRate(rate);   
+    m_private->setRate(rate);
 }
 
 bool MediaPlayer::preservesPitch() const
@@ -703,7 +714,7 @@ bool MediaPlayer::didLoadingProgress()
 }
 
 void MediaPlayer::setSize(const IntSize& size)
-{ 
+{
     m_size = size;
     m_private->setSize(size);
 }
@@ -748,7 +759,7 @@ MediaPlayer::SupportsType MediaPlayer::supportsType(const ContentType& contentTy
     String typeCodecs = contentType.parameter(codecs());
     String system = keySystem.lower();
 
-    // 4.8.10.3 MIME types - The canPlayType(type) method must return the empty string if type is a type that the 
+    // 4.8.10.3 MIME types - The canPlayType(type) method must return the empty string if type is a type that the
     // user agent knows it cannot render or is the type "application/octet-stream"
     if (type == applicationOctetStream())
         return IsNotSupported;
@@ -791,12 +802,12 @@ void MediaPlayer::getSupportedTypes(HashSet<String>& types)
     unsigned count = engines.size();
     for (unsigned ndx = 0; ndx < count; ndx++)
         engines[ndx]->getSupportedTypes(types);
-} 
+}
 
 bool MediaPlayer::isAvailable()
 {
     return !installedMediaEngines().isEmpty();
-} 
+}
 
 #if ENABLE(PLUGIN_PROXY_FOR_VIDEO)
 void MediaPlayer::deliverNotification(MediaPlayerProxyNotificationType notification)
@@ -1083,7 +1094,7 @@ String MediaPlayer::userAgent() const
 {
     if (!m_mediaPlayerClient)
         return String();
-    
+
     return m_mediaPlayerClient->mediaPlayerUserAgent();
 }
 
@@ -1100,7 +1111,7 @@ GraphicsDeviceAdapter* MediaPlayer::graphicsDeviceAdapter() const
 {
     if (!m_mediaPlayerClient)
         return 0;
-    
+
     return m_mediaPlayerClient->mediaPlayerGraphicsDeviceAdapter(this);
 }
 #endif
