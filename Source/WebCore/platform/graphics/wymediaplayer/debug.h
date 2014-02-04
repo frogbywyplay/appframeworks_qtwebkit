@@ -14,13 +14,16 @@
 
 #include "config.h"
 
+#include <sys/syscall.h>
+#include <sys/types.h>
+
 #undef NDEBUG
-#define WYTRACE_ERROR(fmt, args...) printf("%s:%s():%d : ERROR : " fmt, __FILE__, __FUNCTION__, __LINE__, ##args);
+#define WYTRACE_ERROR(fmt, args...) printf("(%d) %s:%s():%d : ERROR : " fmt, syscall(SYS_gettid), __FILE__, __FUNCTION__, __LINE__, ##args);
 
 extern bool g_bTraceEnabled;
 
-#define WY_TRACK(__classname) if (g_bTraceEnabled) printf("%s:%d - %s::%s()\n", __FILE__, __LINE__, #__classname, __FUNCTION__);
-#define WYTRACE_DEBUG(fmt, args...) if (g_bTraceEnabled) printf("%s:%s():%d : DEBUG : " fmt, __FILE__, __FUNCTION__, __LINE__, ##args);
+#define WY_TRACK(__classname) if (g_bTraceEnabled) printf("(%d) %s:%d - %s::%s()\n", syscall(SYS_gettid), __FILE__, __LINE__, #__classname, __FUNCTION__);
+#define WYTRACE_DEBUG(fmt, args...) if (g_bTraceEnabled) printf("(%d) %s:%s():%d : DEBUG : " fmt, syscall(SYS_gettid), __FILE__, __FUNCTION__, __LINE__, ##args);
 
 #define WY_NOT_IMPLEMENTED()    WYTRACE_ERROR("NOT IMPLEMENTED\n");
 
