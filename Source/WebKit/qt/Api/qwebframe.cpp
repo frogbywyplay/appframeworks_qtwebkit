@@ -100,6 +100,11 @@
 #include <qregion.h>
 #include <qnetworkrequest.h>
 
+#ifdef ENABLE_DEBUS_BRIDGE
+#include <JavaScriptCore/APICast.h>
+#include <JavaScriptCore/API/JSContextRef.h>
+#endif
+
 #if ENABLE(ORIENTATION_EVENTS) && !HAVE(QT5)
 QTM_USE_NAMESPACE
 #endif
@@ -203,7 +208,7 @@ void QWebFramePrivate::renderFromTiledBackingStore(GraphicsContext* context, con
     QPainter* painter = context->platformContext();
 
     WebCore::FrameView* view = frame->view();
-    
+
     int scrollX = view->scrollX();
     int scrollY = view->scrollY();
     context->translate(-scrollX, -scrollY);
@@ -212,7 +217,7 @@ void QWebFramePrivate::renderFromTiledBackingStore(GraphicsContext* context, con
         const QRect& clipRect = vector.at(i);
 
         painter->save();
-        
+
         QRect rect = clipRect.translated(scrollX, scrollY);
         painter->setClipRect(rect, Qt::IntersectClip);
 
@@ -589,6 +594,12 @@ void QWebFrame::addToJavaScriptWindowObject(const QString &name, QObject *object
     JSC::ExecState* exec = window->globalExec();
     JSC::JSLockHolder lock(exec);
 
+#ifdef ENABLE_DEBUS_BRIDGE
+    // Do a call to JSContextGetGlobalObject(context); to force linker to add Needed JavascriptCore symbols for browser-dbus-bridge
+    JSContextRef context = ::toRef(exec);
+    JSContextGetGlobalObject(context);
+#endif
+
     JSC::JSObject* runtimeObject =
             JSC::Bindings::QtInstance::getQtInstance(object, root, valueOwnership)->createRuntimeObject(exec);
 
@@ -716,14 +727,14 @@ static inline QUrl ensureAbsoluteUrl(const QUrl &url)
     if (!url.isValid() || !url.isRelative())
         return url;
 
-    // This contains the URL with absolute path but without 
+    // This contains the URL with absolute path but without
     // the query and the fragment part.
-    QUrl baseUrl = QUrl::fromLocalFile(QFileInfo(url.toLocalFile()).absoluteFilePath()); 
+    QUrl baseUrl = QUrl::fromLocalFile(QFileInfo(url.toLocalFile()).absoluteFilePath());
 
     // The path is removed so the query and the fragment parts are there.
     QString pathRemoved = url.toString(QUrl::RemovePath);
     QUrl toResolve(pathRemoved);
-    
+
     return baseUrl.resolved(toResolve);
 }
 

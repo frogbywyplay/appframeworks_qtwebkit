@@ -457,7 +457,7 @@ PKG_CHECK_MODULES(LIBXML, libxml-2.0 >= $LIBXML_REQUIRED_VERSION)
 AC_SUBST(LIBXML_CFLAGS)
 AC_SUBST(LIBXML_LIBS)
 
-PKG_CHECK_MODULES(PANGO, 
+PKG_CHECK_MODULES(PANGO,
                   [pango >= $PANGO_REQUIRED_VERSION
                    pangoft2])
 AC_SUBST(PANGO_CFLAGS)
@@ -474,6 +474,19 @@ PKG_CHECK_MODULES(ENCHANT, enchant >= $ENCHANT_REQUIRED_VERSION, [], [enable_spe
 AC_SUBST(ENCHANT_CFLAGS)
 AC_SUBST(ENCHANT_LIBS)
 fi
+
+## Settings for wyplay USE flags
+# dbus-bridge USE flag
+AC_MSG_CHECKING([Needed for dbus-bridge application (default : disabled)])
+AC_ARG_ENABLE(dbus_bridge,
+              AC_HELP_STRING([--enable-dbus-bridge],
+                             [Needed for dbus-bridge application (default : disabled)]),
+              [],[enable_dbus_bridge="no"])
+AC_MSG_RESULT([$enable_dbus_bridge])
+if test "$enable_dbus_bridge" = "yes"; then
+    AC_DEFINE([ENABLE_DEBUS_BRIDGE], [1], [Needed for dbus-bridge application])
+fi
+
 
 # farstream-0.1 depends on gstreamer 0.10 currently. Disable
 # media_stream if gstreamer 0.11 build support is enabled.
@@ -653,7 +666,7 @@ if test "$with_acceleration_backend" = "opengl"; then
 fi
 
 # OpenGL is turned on by default (along with WebGL and accelerated compositing), but if
-# Clutter is chosen as the accelerated drawing backend, we want to disable it. COGL does 
+# Clutter is chosen as the accelerated drawing backend, we want to disable it. COGL does
 # not play well with OpenGL.
 AC_MSG_CHECKING([whether to enable WebGL support])
 AC_ARG_ENABLE(webgl,
@@ -914,7 +927,7 @@ GIRTYPELIBDIR=
 if test "$enable_introspection" = "yes"; then
   GOBJECT_INTROSPECTION_REQUIRED=0.9.5
   PKG_CHECK_MODULES([INTROSPECTION],[gobject-introspection-1.0 >= $GOBJECT_INTROSPECTION_REQUIRED])
-  
+
   G_IR_SCANNER="$($PKG_CONFIG --variable=g_ir_scanner gobject-introspection-1.0)"
   G_IR_COMPILER="$($PKG_CONFIG --variable=g_ir_compiler gobject-introspection-1.0)"
   G_IR_GENERATE="$($PKG_CONFIG --variable=g_ir_generate gobject-introspection-1.0)"
@@ -1237,7 +1250,7 @@ AM_CONDITIONAL([ENABLE_INTROSPECTION],[test "$enable_introspection" = "yes"])
 AC_CONFIG_FILES([
 GNUmakefile
 ])
- 
+
 
 AC_CONFIG_FILES([
 Source/WebKit/gtk/webkit/webkitversion.h
