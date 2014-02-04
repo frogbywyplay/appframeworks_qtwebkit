@@ -939,6 +939,8 @@ bool MediaPlayerPrivateWYMediaPlayer::renderVideoFrame(GraphicsContext* c, const
                 if (l_image.get())
                 {
                     IntRect l_rectDestinationArea = r;
+                    IntRect  l_rectBB1;
+                    IntRect  l_rectBB2;
                     bool    l_bAdaptToAspectRatio = g_bPreserveAspectRatio;
                     if (l_bAdaptToAspectRatio)
                     {
@@ -947,29 +949,57 @@ bool MediaPlayerPrivateWYMediaPlayer::renderVideoFrame(GraphicsContext* c, const
                         float   l_fDFBSurfaceRatio = ((float)l_nDirectFBSurfaceWidth) / ((float)l_nDirectFBSurfaceHeight);
                         if (l_fGraphicsContextRatio > l_fDFBSurfaceRatio)
                         {
+                            l_rectDestinationArea.setWidth(l_fDFBSurfaceRatio * (float)r.height());
                             l_rectDestinationArea.setHeight(r.height());
-                            l_rectDestinationArea.setWidth((int)(l_fDFBSurfaceRatio * ((float)l_rectDestinationArea.height())));
-                            l_rectDestinationArea.setX((r.width() - l_rectDestinationArea.width()) / 2);
+
+                            l_rectBB1.setX(0);
+                            l_rectBB1.setY(0);
+                            l_rectBB1.setWidth((r.width() - l_rectDestinationArea.width()) / 2);
+                            l_rectBB1.setHeight(l_rectDestinationArea.height());
+
+                            l_rectDestinationArea.setX(l_rectBB1.x() + l_rectBB1.width());
                             l_rectDestinationArea.setY(0);
+
+                            l_rectBB2.setX(l_rectDestinationArea.x() + l_rectDestinationArea.width());
+                            l_rectBB2.setY(0);
+                            l_rectBB2.setWidth(r.width() - (l_rectBB1.width() + l_rectDestinationArea.width()));
+                            l_rectBB2.setHeight(l_rectDestinationArea.height());
                         }
                         else
                         {
                             l_rectDestinationArea.setWidth(r.width());
-                            l_rectDestinationArea.setHeight((int)(((float)l_rectDestinationArea.width()) / l_fDFBSurfaceRatio));
-                            l_rectDestinationArea.setX(0);
-                            l_rectDestinationArea.setY((r.height() - l_rectDestinationArea.height()) / 2);
+                            l_rectDestinationArea.setHeight((float)r.width() / l_fDFBSurfaceRatio);
 
+                            l_rectBB1.setX(0);
+                            l_rectBB1.setY(0);
+                            l_rectBB1.setWidth(l_rectDestinationArea.width());
+                            l_rectBB1.setHeight((r.height() - l_rectDestinationArea.height()) / 2);
+
+                            l_rectDestinationArea.setX(0);
+                            l_rectDestinationArea.setY(l_rectBB1.y() + l_rectBB1.height());
+
+                            l_rectBB2.setX(0);
+                            l_rectBB2.setY(l_rectDestinationArea.y() + l_rectDestinationArea.height());
+                            l_rectBB2.setWidth(l_rectDestinationArea.width());
+                            l_rectBB2.setHeight(r.height() - (l_rectBB1.height() + l_rectDestinationArea.height()));
                         }
+                        l_rectBB1.setX(l_rectBB1.x() + r.x());
+                        l_rectBB1.setY(l_rectBB1.y() + r.y());
                         l_rectDestinationArea.setX(l_rectDestinationArea.x() + r.x());
                         l_rectDestinationArea.setY(l_rectDestinationArea.y() + r.y());
+                        l_rectBB2.setX(l_rectBB2.x() + r.x());
+                        l_rectBB2.setY(l_rectBB2.y() + r.y());
                     }
+                    c->fillRect(l_rectBB1, Color(1,0,0), ColorSpaceSRGB);
                     c->drawImage(reinterpret_cast<Image*>(l_image.get()), ColorSpaceSRGB, l_rectDestinationArea, CompositeCopy, false);
+                    c->fillRect(l_rectBB2, Color(1,0,0), ColorSpaceSRGB);
                 }
             }
             else
             {
                 WYTRACE_ERROR("l_pDirectFBSurface->GetSize() FAILED (l_dfbResult = 0x%08X (%d))\n", l_dfbResult, l_dfbResult);
             }
+
             l_pDirectFBSurface->Release(l_pDirectFBSurface);
             l_pDirectFBSurface = NULL;
             return true;
