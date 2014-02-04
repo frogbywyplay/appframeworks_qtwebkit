@@ -73,6 +73,10 @@ typedef void (GL_APIENTRYP PFNGLGETNUNIFORMFVEXTPROC) (GLuint program, GLint loc
 typedef void (GL_APIENTRYP PFNGLGETNUNIFORMIVEXTPROC) (GLuint program, GLint location, GC3Dsizei bufSize, GLint *params);
 #endif
 
+#ifndef PFNGLFRAMEBUFFERTEXTURE2DMULTISAMPLEIMG
+typedef void (GL_APIENTRYP PFNGLFRAMEBUFFERTEXTURE2DMULTISAMPLEIMG) (GLenum, GLenum, GLenum, GLuint, GLint, GLsizei);
+#endif
+
 namespace WebCore {
 
 class Extensions3DOpenGLES : public Extensions3DOpenGLCommon {
