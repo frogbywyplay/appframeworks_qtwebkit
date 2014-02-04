@@ -58,8 +58,6 @@ private:
     WYSmartPtr<IWebkitMediaPlayer>      m_spWebkitMediaPlayer;
     IDirectFB*                          m_pDirectFB;
 
-    Timer<MediaPlayerPrivateWYMediaPlayer>  m_fillTimer;
-
     bool    m_bNetworkStateChanged;
     bool    m_bReadyStateChanged;
     bool    m_bVolumeChanged;
@@ -83,12 +81,16 @@ protected:
     virtual bool init();
     virtual bool uninit();
 
-            void fillTimerFired(Timer<MediaPlayerPrivateWYMediaPlayer>*);
             bool renderVideoFrame(GraphicsContext* c, const IntRect& r) const;
 
             RefPtr<BitmapImage> bitmapImageFromDirectFBSurface(IDirectFBSurface* p_pDirectFBSurface) const;
 
             void updateStates();
+
+public:
+            // player status change mng
+            static void updateStatesCallback(void* thiz);
+
 public:
     static  PassOwnPtr<MediaPlayerPrivateInterface>    create(MediaPlayer* player);
     static  bool                            isAvailable();

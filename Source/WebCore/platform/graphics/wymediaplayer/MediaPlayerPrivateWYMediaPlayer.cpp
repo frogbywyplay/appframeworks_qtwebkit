@@ -226,7 +226,6 @@ MediaPlayer::SupportsType MediaPlayerPrivateWYMediaPlayer::supportsType(const St
 //
 MediaPlayerPrivateWYMediaPlayer::MediaPlayerPrivateWYMediaPlayer(MediaPlayer* player)
     : m_webCorePlayer(player)
-    , m_fillTimer(this, &MediaPlayerPrivateWYMediaPlayer::fillTimerFired)
     , m_threadCreator(currentThread())
 #if PLATFORM(QT)
     , m_pVideoItem(NULL)
@@ -239,6 +238,7 @@ MediaPlayerPrivateWYMediaPlayer::MediaPlayerPrivateWYMediaPlayer(MediaPlayer* pl
 MediaPlayerPrivateWYMediaPlayer::~MediaPlayerPrivateWYMediaPlayer()
 {
     WY_TRACK(MediaPlayerPrivateWYMediaPlayer);
+    cancelCallOnMainThread(updateStatesCallback, this);
     uninit();
 }
 
@@ -337,9 +337,6 @@ bool MediaPlayerPrivateWYMediaPlayer::uninit()
     m_bPlaybackStateChanged = false;
     m_bDurationChanged = false;
 
-    if (m_fillTimer.isActive())
-        m_fillTimer.stop();
-
     if (m_spWebkitMediaPlayer)
     {
         m_spWebkitMediaPlayer->setEventSink(NULL);
@@ -357,43 +354,19 @@ bool MediaPlayerPrivateWYMediaPlayer::uninit()
     return true;
 }
 
-void MediaPlayerPrivateWYMediaPlayer::fillTimerFired(Timer<MediaPlayerPrivateWYMediaPlayer>*)
-{
-    if (!m_spWebkitMediaPlayer) return;
-
-#if 0
-    bool    l_bLoadingComplete = false;
-    updateStates(l_bLoadingComplete);
-
-    if (l_bLoadingComplete)
-    {
-        m_fillTimer.stop();
-    }
-#endif
-}
-
 // Player interface
 void MediaPlayerPrivateWYMediaPlayer::load(const String& url)
 {
     WY_TRACK(MediaPlayerPrivateWYMediaPlayer);
-    updateStates();
     if (!m_spWebkitMediaPlayer) return;
 
     m_spWebkitMediaPlayer->load(url.utf8().data());
-
-    if (m_fillTimer.isActive())
-        m_fillTimer.stop();
-    m_fillTimer.startRepeating(0.2);
 }
 
 void MediaPlayerPrivateWYMediaPlayer::cancelLoad()
 {
     WY_TRACK(MediaPlayerPrivateWYMediaPlayer);
-    updateStates();
     if (!m_spWebkitMediaPlayer) return;
-
-    if (m_fillTimer.isActive())
-        m_fillTimer.stop();
 
     m_spWebkitMediaPlayer->cancelLoad();
 }
@@ -401,7 +374,6 @@ void MediaPlayerPrivateWYMediaPlayer::cancelLoad()
 void MediaPlayerPrivateWYMediaPlayer::prepareToPlay()
 {
     WY_TRACK(MediaPlayerPrivateWYMediaPlayer);
-    updateStates();
     if (!m_spWebkitMediaPlayer) return;
 
     m_spWebkitMediaPlayer->prepareToPlay();
@@ -410,7 +382,6 @@ void MediaPlayerPrivateWYMediaPlayer::prepareToPlay()
 void MediaPlayerPrivateWYMediaPlayer::play()
 {
     WY_TRACK(MediaPlayerPrivateWYMediaPlayer);
-    updateStates();
     if (!m_spWebkitMediaPlayer) return;
 
     m_spWebkitMediaPlayer->play();
@@ -419,7 +390,6 @@ void MediaPlayerPrivateWYMediaPlayer::play()
 void MediaPlayerPrivateWYMediaPlayer::pause()
 {
     WY_TRACK(MediaPlayerPrivateWYMediaPlayer);
-    updateStates();
     if (!m_spWebkitMediaPlayer) return;
 
     m_spWebkitMediaPlayer->pause();
@@ -478,7 +448,6 @@ bool MediaPlayerPrivateWYMediaPlayer::hasAudio() const
 void MediaPlayerPrivateWYMediaPlayer::setVisible(bool p_bVisible)
 {
 //    WY_TRACK(MediaPlayerPrivateWYMediaPlayer);
-    updateStates();
     if (!m_spWebkitMediaPlayer) return;
 
     m_spWebkitMediaPlayer->setVisible(p_bVisible);
@@ -503,7 +472,6 @@ float MediaPlayerPrivateWYMediaPlayer::currentTime() const
 void MediaPlayerPrivateWYMediaPlayer::seek(float time)
 {
     WY_TRACK(MediaPlayerPrivateWYMediaPlayer);
-    updateStates();
     if (!m_spWebkitMediaPlayer) return;
 
     m_spWebkitMediaPlayer->seek(time);
@@ -528,7 +496,6 @@ float MediaPlayerPrivateWYMediaPlayer::startTime() const
 void MediaPlayerPrivateWYMediaPlayer::setRate(float p_fRate)
 {
     WY_TRACK(MediaPlayerPrivateWYMediaPlayer);
-    updateStates();
     if (!m_spWebkitMediaPlayer) return;
 
     m_spWebkitMediaPlayer->setRate(p_fRate);
@@ -537,7 +504,6 @@ void MediaPlayerPrivateWYMediaPlayer::setRate(float p_fRate)
 void MediaPlayerPrivateWYMediaPlayer::setPreservesPitch(bool p_bPreservePitch)
 {
     WY_TRACK(MediaPlayerPrivateWYMediaPlayer);
-    updateStates();
     if (!m_spWebkitMediaPlayer) return;
 
     m_spWebkitMediaPlayer->setPreservesPitch(p_bPreservePitch);
@@ -554,7 +520,6 @@ bool MediaPlayerPrivateWYMediaPlayer::paused() const
 void MediaPlayerPrivateWYMediaPlayer::setVolume(float p_fVolume)
 {
     WY_TRACK(MediaPlayerPrivateWYMediaPlayer);
-    updateStates();
     if (!m_spWebkitMediaPlayer) return;
 
     m_spWebkitMediaPlayer->setVolume(p_fVolume);
@@ -571,7 +536,6 @@ bool MediaPlayerPrivateWYMediaPlayer::supportsMuting() const
 void MediaPlayerPrivateWYMediaPlayer::setMuted(bool p_bMuted)
 {
     WY_TRACK(MediaPlayerPrivateWYMediaPlayer);
-    updateStates();
     if (!m_spWebkitMediaPlayer) return;
 
     m_spWebkitMediaPlayer->setMuted(p_bMuted);
@@ -588,7 +552,6 @@ bool MediaPlayerPrivateWYMediaPlayer::hasClosedCaptions() const
 void MediaPlayerPrivateWYMediaPlayer::setClosedCaptionsVisible(bool p_bClosedCaptionsVisible)
 {
     WY_TRACK(MediaPlayerPrivateWYMediaPlayer);
-    updateStates();
     if (!m_spWebkitMediaPlayer) return;
 
     m_spWebkitMediaPlayer->setClosedCaptionsVisible(p_bClosedCaptionsVisible);
@@ -739,8 +702,6 @@ unsigned MediaPlayerPrivateWYMediaPlayer::totalBytes() const
 void MediaPlayerPrivateWYMediaPlayer::setSize(const IntSize& p_sizeSize)
 {
 //    WY_TRACK(MediaPlayerPrivateWYMediaPlayer);
-    updateStates();
-
     if (!m_spWebkitMediaPlayer) return;
 
     m_spWebkitMediaPlayer->setSize(p_sizeSize.width(), p_sizeSize.height());
@@ -749,7 +710,6 @@ void MediaPlayerPrivateWYMediaPlayer::setSize(const IntSize& p_sizeSize)
 void MediaPlayerPrivateWYMediaPlayer::setPreload(MediaPlayer::Preload p_ePreload)
 {
     WY_TRACK(MediaPlayerPrivateWYMediaPlayer);
-    updateStates();
     if (!m_spWebkitMediaPlayer) return;
 
     eMediaPlayerPreload l_eMediaPlayerPreload = eMPPL_None;
@@ -791,7 +751,6 @@ bool MediaPlayerPrivateWYMediaPlayer::canLoadPoster() const
 void MediaPlayerPrivateWYMediaPlayer::setPoster(const String& p_strPoster)
 {
     WY_TRACK(MediaPlayerPrivateWYMediaPlayer);
-    updateStates();
     if (!m_spWebkitMediaPlayer) return;
 
     m_spWebkitMediaPlayer->setPoster(p_strPoster.utf8().data());
@@ -808,7 +767,6 @@ bool MediaPlayerPrivateWYMediaPlayer::hasSingleSecurityOrigin() const
 MediaPlayer::MovieLoadType MediaPlayerPrivateWYMediaPlayer::movieLoadType()
 {
     WY_TRACK(MediaPlayerPrivateWYMediaPlayer);
-    updateStates();
     if (!m_spWebkitMediaPlayer) return MediaPlayer::Unknown;
 
     eMediaPlayerMovieLoadType   l_eMediaPlayerMovieLoadType = eMPMLT_Unknown;
@@ -841,7 +799,6 @@ MediaPlayer::MovieLoadType MediaPlayerPrivateWYMediaPlayer::movieLoadType()
 void MediaPlayerPrivateWYMediaPlayer::prepareForRendering()
 {
     WY_TRACK(MediaPlayerPrivateWYMediaPlayer);
-    updateStates();
     if (!m_spWebkitMediaPlayer) return;
 
     m_spWebkitMediaPlayer->prepareForRendering();
@@ -1019,9 +976,7 @@ bool MediaPlayerPrivateWYMediaPlayer::renderVideoFrame(GraphicsContext* c, const
 
 void MediaPlayerPrivateWYMediaPlayer::paint(GraphicsContext* c, const IntRect& r)
 {
-//    printf("%s:%s():%d : MediaPlayerPrivateWYMediaPlayer::paint()\n", __FILE__, __FUNCTION__, __LINE__);
     WYTRACE_DEBUG("Paint area : (%d, %d) - (%d x %d)\n", r.x(), r.y(), r.width(), r.height());
-    updateStates();
     if (c->paintingDisabled())
         return;
 
@@ -1029,6 +984,13 @@ void MediaPlayerPrivateWYMediaPlayer::paint(GraphicsContext* c, const IntRect& r
         return;
 
     renderVideoFrame(c, r);
+}
+
+void MediaPlayerPrivateWYMediaPlayer::updateStatesCallback(void* p_thiz)
+{
+    MediaPlayerPrivateWYMediaPlayer* thiz = static_cast<MediaPlayerPrivateWYMediaPlayer*>(p_thiz);
+    if (thiz)
+        thiz->updateStates();
 }
 
 void MediaPlayerPrivateWYMediaPlayer::updateStates()
@@ -1100,6 +1062,7 @@ void MediaPlayerPrivateWYMediaPlayer::networkStateChanged()
     else
     {
         m_bNetworkStateChanged = true;
+        callOnMainThread(updateStatesCallback, this);
     }
 
 }
@@ -1114,6 +1077,7 @@ void MediaPlayerPrivateWYMediaPlayer::readyStateChanged()
     else
     {
         m_bReadyStateChanged = true;
+        callOnMainThread(updateStatesCallback, this);
     }
 }
 
@@ -1128,6 +1092,7 @@ void MediaPlayerPrivateWYMediaPlayer::volumeChanged(float p_fVolume)
     else
     {
         m_bVolumeChanged = true;
+        callOnMainThread(updateStatesCallback, this);
     }
 }
 
@@ -1142,6 +1107,7 @@ void MediaPlayerPrivateWYMediaPlayer::muteChanged(bool p_bMuted)
     else
     {
         m_bMuteChanged = true;
+        callOnMainThread(updateStatesCallback, this);
     }
 }
 
@@ -1155,6 +1121,7 @@ void MediaPlayerPrivateWYMediaPlayer::timeChanged()
     else
     {
         m_bTimeChanged = true;
+        callOnMainThread(updateStatesCallback, this);
     }
 }
 
@@ -1168,6 +1135,7 @@ void MediaPlayerPrivateWYMediaPlayer::sizeChanged()
     else
     {
         m_bSizeChanged = true;
+        callOnMainThread(updateStatesCallback, this);
     }
 }
 
@@ -1181,6 +1149,7 @@ void MediaPlayerPrivateWYMediaPlayer::rateChanged()
     else
     {
         m_bRateChanged = true;
+        callOnMainThread(updateStatesCallback, this);
     }
 }
 
@@ -1194,6 +1163,7 @@ void MediaPlayerPrivateWYMediaPlayer::playbackStateChanged()
     else
     {
         m_bPlaybackStateChanged = true;
+        callOnMainThread(updateStatesCallback, this);
     }
 }
 
@@ -1207,6 +1177,7 @@ void MediaPlayerPrivateWYMediaPlayer::durationChanged()
     else
     {
         m_bDurationChanged = true;
+        callOnMainThread(updateStatesCallback, this);
     }
 }
 
