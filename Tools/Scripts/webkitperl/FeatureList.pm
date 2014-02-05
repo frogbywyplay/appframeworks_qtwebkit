@@ -134,6 +134,9 @@ my (
     $touchIconLoadingSupport,
     $vibrationSupport,
     $videoSupport,
+    $wymediaplayerSupport,
+    $glnexusSupport,
+    $dbusbridgeSupport,
     $videoTrackSupport,
     $webglSupport,
     $webAudioSupport,
@@ -417,6 +420,15 @@ my @features = (
 
     { option => "video", desc => "Toggle Video support",
       define => "ENABLE_VIDEO", default => (isAppleWebKit() || isGtk() || isBlackBerry() || isEfl()), value => \$videoSupport },
+
+    { option => "wymediaplayer", desc => "Toggle wymedia player helper support for video",
+      define => "ENABLE_WYMEDIAPLAYER", default => 0, value => \$wymediaplayerSupport },
+
+    { option => "glnexus", desc => "Toggle opengl over nexus support",
+      define => "ENABLE_GLNEXUS_SUPPORT", default => 0, value => \$glnexusSupport },
+
+    { option => "dbus-bridge", desc => "Toggle dbus bridge support",
+      define => "ENABLE_DBUS_BRIDGE", default => 0, value => \$dbusbridgeSupport },
 
     { option => "video-track", desc => "Toggle Video Track support",
       define => "ENABLE_VIDEO_TRACK", default => (isAppleWebKit() || isGtk() || isEfl() || isBlackBerry()), value => \$videoTrackSupport },
