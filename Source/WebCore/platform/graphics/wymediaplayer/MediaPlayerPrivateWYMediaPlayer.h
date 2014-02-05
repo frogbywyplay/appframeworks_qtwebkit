@@ -124,7 +124,7 @@ public:
     static  bool                            isAvailable();
     static  bool                            doWYMediaPlayerInit();
     static  void                            getSupportedTypes(HashSet<String>&);
-    static  MediaPlayer::SupportsType       supportsType(const String& type, const String& codecs);
+    static  MediaPlayer::SupportsType       supportsType(const String& type, const String& codecs, const WebCore::KURL&);
     static  void                            registerMediaEngine(MediaEngineRegistrar);
 
 public:
@@ -139,10 +139,10 @@ public:
 #if USE(TEXTURE_MAPPER)
     // Const-casting here is safe, since all of TextureMapperPlatformLayer's functions are const.g
     virtual void paintToTextureMapper(TextureMapper*, const FloatRect& targetRect, const TransformationMatrix&, float opacity, BitmapTexture* mask) const;
+#endif // USE(TEXTURE_MAPPER)
 #else // ENABLE_GLNEXUS_SUPPORT
     virtual PlatformLayer* platformLayer() const;
 #endif // ENABLE_GLNEXUS_SUPPORT
-#endif
 #endif
 
     virtual void play();
@@ -257,6 +257,7 @@ public:
     virtual void repaint();
     virtual float rate();
     virtual bool  visible();
+    bool didLoadingProgress() const { return 0; }
 };
 
 }

@@ -29,7 +29,7 @@ using namespace WebCore;
 // ImageWYMediaPlayer class
 //////////////////////////////////////////
 
-#include "GOwnPtr.h"
+//#include "GOwnPtr.h"
 #include <wtf/PassRefPtr.h>
 
 #ifndef ENABLE_GLNEXUS_SUPPORT
@@ -210,7 +210,7 @@ void MediaPlayerPrivateWYMediaPlayer::getSupportedTypes(HashSet<String>& types)
     types = l_setSupportedTypes;
 }
 
-MediaPlayer::SupportsType MediaPlayerPrivateWYMediaPlayer::supportsType(const String& type, const String& codecs)
+MediaPlayer::SupportsType MediaPlayerPrivateWYMediaPlayer::supportsType(const String& type, const String& codecs, const WebCore::KURL&)
 {
     WY_TRACK(MediaPlayerPrivateWYMediaPlayer);
     if (g_spMediaPlayersManager == NULL)
