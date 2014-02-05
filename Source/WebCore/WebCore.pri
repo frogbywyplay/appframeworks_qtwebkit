@@ -188,6 +188,11 @@ contains(DEFINES, WTF_USE_GSTREAMER=1) {
 }
 
 contains(DEFINES, ENABLE_VIDEO=1) {
+
+    contains(DEFINES, ENABLE_WYMEDIAPLAYER=1) {
+        DEFINES += WTF_USE_WYMEDIAPLAYER=1
+    }
+
     contains(DEFINES, WTF_USE_QTKIT=1) {
         INCLUDEPATH += $$SOURCE_DIR/platform/graphics/mac
 
