@@ -1,3 +1,37 @@
+2013-10-01  Allan Sandfeld Jensen  <allan.jensen@digia.com>
+
+        [Texmap] CSS filter not working on software composited layers
+        https://bugs.webkit.org/show_bug.cgi?id=122159
+
+        Reviewed by Noam Rosenthal.
+
+        Tell the rendering layer we do not support CSS filters when we do not. This
+        will make RenderLayer fall back to using its own software implementation.
+
+        * platform/graphics/texmap/GraphicsLayerTextureMapper.cpp:
+        (WebCore::GraphicsLayerTextureMapper::setFilters):
+        * platform/graphics/texmap/TextureMapperImageBuffer.cpp:
+        (WebCore::BitmapTextureImageBuffer::applyFilters):
+
+2013-09-17  Michael Brüning  <michael.bruning@digia.com>
+
+        Correct range used for Emoji checks.
+        https://bugs.webkit.org/show_bug.cgi?id=121486
+
+        Reviewed by Allan Sandfeld Jensen.
+
+        Found and reported by David Binderman via Qt bug tracker.
+
+        The check if a character was in the Emoji range always evaluated to
+        false due to the upper range limit being lower than the lower limit.
+
+        Changed the upper limit to the highest assigned character from the
+        "Transport and Map Symbols" (0x1F6C5) as that seems to have been the
+        intended upper range limit of this check.
+
+        * platform/graphics/Font.cpp:
+        (WebCore::Font::isCJKIdeographOrSymbol):
+
 2013-08-19  Allan Sandfeld Jensen  <allan.jensen@digia.com>
 
         [Qt] QtWebKit (using the Arora browser) displays the border radii (radius) of a button very ugly
@@ -593,6 +627,34 @@
         * rendering/RenderBlock.cpp:
         (WebCore::RenderBlock::containingColumnsBlock):
 
+2013-02-20  Mike West  <mkwst@chromium.org>
+
+        Mouseup event does not fire on Scroll Bar
+        https://bugs.webkit.org/show_bug.cgi?id=25811
+
+        Reviewed by Tony Chang.
+
+        Currently, clicking on a scrollbar fires a mousedown event, but not a
+        mouseup event. This causes problems for code like jQuery UI's
+        draggable[1], as the drag starts, but is never cancelled. Other use
+        cases are noted in the slightly old Chromium bug[2].
+
+        If a mouseup event is received after a mousedown event on a scrollbar,
+        this patch dispatches a mouseup event on the same node the mousedown
+        event dispatched on. This matches Gecko's behavior.
+
+        [1]: http://bugs.jqueryui.com/ticket/6925
+        [2]: http://crbug.com/14204
+
+        Tests: fast/scrolling/scrollbar-mousedown-mouseup.html
+               fast/scrolling/scrollbar-mousedown-move-mouseup.html
+
+        * page/EventHandler.cpp:
+        (WebCore::EventHandler::handleMouseReleaseEvent):
+            If a mouseup event follow a mousedown event on a scrollbar,
+            dispatch an event on the same node from which the mousedown event
+            was triggered.
+
 2013-02-19  Andras Becsi  <andras.becsi@digia.com>
 
         [Qt] Fix compilation if Qt was configured with -no-rtti
@@ -837,6 +899,21 @@
         (WebCore::Element::hasFlagsSetDuringStylingOfChildren):
         * dom/Element.h:
         (Element):
+
+2013-01-21  ChangSeok Oh  <shivamidow@gmail.com>
+
+        [Texmap][GTK] The poster-circle doesn't appear.
+        https://bugs.webkit.org/show_bug.cgi?id=106672
+
+        Reviewed by Noam Rosenthal.
+
+        We need to call setNeedsDisplay to redraw GraphicsLayer after we set drawsContent
+        a new value for the layer. Otherwise we can't get a chance for first drawing the layer.
+
+        Test: compositing/visibility/visibility-composited-animation.html
+
+        * platform/graphics/texmap/TextureMapperLayer.cpp:
+        (WebCore::TextureMapperLayer::flushCompositingStateForThisLayerOnly):
 
 2013-01-15  Allan Sandfeld Jensen  <allan.jensen@digia.com>
 
@@ -1170,6 +1247,60 @@
         * bindings/scripts/CodeGeneratorJS.pm:
         (GenerateGetOwnPropertySlotBody): Use getStaticValueSlotEntryWithoutCaching to climb up the class
         hierarchy.
+
+2012-12-20  Huang Dongsung  <luxtella@company100.net>
+
+        [WebGL][EFL][Qt][GTK] Jelly fishes leave trails on webgl canvas.
+        https://bugs.webkit.org/show_bug.cgi?id=105326
+
+        Reviewed by Noam Rosenthal.
+
+        Clear a drawing buffer after compositing if preserveDrawingBuffer is
+        false.
+        http://www.khronos.org/registry/webgl/specs/latest/#2.2
+
+        No new tests. Covered by existing webgl-preserve-drawing-buffer-repaint test.
+
+        * platform/graphics/cairo/GraphicsContext3DPrivate.cpp:
+        (WebCore::GraphicsContext3DPrivate::paintToTextureMapper):
+        * platform/graphics/efl/GraphicsContext3DPrivate.cpp:
+        (GraphicsContext3DPrivate::copyToGraphicsSurface):
+        * platform/graphics/qt/GraphicsContext3DQt.cpp:
+        (WebCore::GraphicsContext3DPrivate::paintToTextureMapper):
+        (WebCore::GraphicsContext3DPrivate::copyToGraphicsSurface):
+
+2012-12-20  Huang Dongsung  <luxtella@company100.net>
+
+        [TexMap] Remove ParentChange in TextureMapperLayer.
+        https://bugs.webkit.org/show_bug.cgi?id=105494
+
+        Reviewed by Noam Rosenthal.
+
+        ParentChange is useless, because ChildrenChange is enough. In addition,
+        GraphicsLayer uses setParent() method internally. This patch copies
+        GraphicsLayer::setChildren() into TextureMapperLayer::setChildren().
+
+        No new tests. Covered by existing tests.
+
+        * platform/graphics/texmap/GraphicsLayerTextureMapper.cpp:
+        (WebCore):
+        (WebCore::GraphicsLayerTextureMapper::setChildren):
+          Match the similar style of replaceChild().
+        * platform/graphics/texmap/GraphicsLayerTextureMapper.h:
+        (GraphicsLayerTextureMapper):
+        * platform/graphics/texmap/TextureMapperLayer.cpp:
+        (WebCore::TextureMapperLayer::flushCompositingStateForThisLayerOnly):
+        (WebCore::TextureMapperLayer::setChildren):
+          Copied from GraphicsLayer::setChildren().
+        (WebCore):
+        (WebCore::TextureMapperLayer::addChild):
+          Copied from GraphicsLayer::addChild().
+        (WebCore::TextureMapperLayer::removeFromParent):
+          Copied from GraphicsLayer::removeFromParent().
+        (WebCore::TextureMapperLayer::removeAllChildren):
+          Copied from GraphicsLayer::removeAllChildren().
+        * platform/graphics/texmap/TextureMapperLayer.h:
+        (TextureMapperLayer):
 
 2012-12-13  Filip Pizlo  <fpizlo@apple.com>
 

@@ -233,6 +233,7 @@ static inline quint32 swapBgrToRgb(quint32 pixel)
 #if USE(ACCELERATED_COMPOSITING)
 void GraphicsContext3DPrivate::paintToTextureMapper(TextureMapper* textureMapper, const FloatRect& targetRect, const TransformationMatrix& matrix, float opacity, BitmapTexture* mask)
 {
+    m_context->markLayerComposited();
     blitMultisampleFramebufferAndRestoreContext();
 
     if (textureMapper->accelerationMode() == TextureMapper::OpenGLMode) {
@@ -299,6 +300,7 @@ uint32_t GraphicsContext3DPrivate::copyToGraphicsSurface()
     if (!m_graphicsSurface)
         return 0;
 
+    m_context->markLayerComposited();
     blitMultisampleFramebufferAndRestoreContext();
     makeCurrentIfNeeded();
     m_graphicsSurface->copyFromTexture(m_context->m_texture, IntRect(0, 0, m_context->m_currentWidth, m_context->m_currentHeight));
