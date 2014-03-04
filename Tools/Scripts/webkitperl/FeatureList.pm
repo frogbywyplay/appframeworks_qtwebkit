@@ -135,6 +135,8 @@ my (
     $vibrationSupport,
     $videoSupport,
     $wymediaplayerSupport,
+    $openglSupport,
+    $directfbSupport,
     $glnexusSupport,
     $dbusbridgeSupport,
     $videoTrackSupport,
@@ -423,6 +425,12 @@ my @features = (
 
     { option => "wymediaplayer", desc => "Toggle wymedia player helper support for video",
       define => "ENABLE_WYMEDIAPLAYER", default => 0, value => \$wymediaplayerSupport },
+
+    { option => "opengl", desc => "Toggle opengl support",
+      define => "ENABLE_OPENGL_SUPPORT", default => 0, value => \$openglSupport },
+
+    { option => "directfb", desc => "Toggle directfb support",
+      define => "ENABLE_DFB_SUPPORT", default => 0, value => \$directfbSupport },
 
     { option => "glnexus", desc => "Toggle opengl over nexus support",
       define => "ENABLE_GLNEXUS_SUPPORT", default => 0, value => \$glnexusSupport },

@@ -12,7 +12,7 @@
 
 namespace WebCore
 {
-#ifdef ENABLE_GLNEXUS_SUPPORT
+#if defined(ENABLE_GLNEXUS_SUPPORT) || defined(ENABLE_OPENGL_SUPPORT)
 class QWYVideoItem
 {
 };
