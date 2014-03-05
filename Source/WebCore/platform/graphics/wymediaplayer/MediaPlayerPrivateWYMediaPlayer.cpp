@@ -1042,7 +1042,8 @@ void MediaPlayerPrivateWYMediaPlayer::paint(GraphicsContext* c, const IntRect& r
     {
         GLuint textureId = 0;
         GLuint* pTex = &textureId;
-        bool result = m_spWebkitMediaPlayer->videoFrame((void**)&pTex, 0,0,0,0);
+        IntRect cTw(m_webCorePlayer->frameView()->contentsToWindow(r));
+        bool result = m_spWebkitMediaPlayer->videoFrame((void**)&pTex, cTw.x(), cTw.y(), cTw.width(), cTw.height());
         if (result && pTex && *pTex)
         { // draw a captured frame
             l_pPainter->save();
