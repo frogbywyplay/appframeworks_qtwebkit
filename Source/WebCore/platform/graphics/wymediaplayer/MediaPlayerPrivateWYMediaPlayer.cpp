@@ -889,15 +889,15 @@ PlatformLayer* MediaPlayerPrivateWYMediaPlayer::platformLayer() const
 #if USE(ACCELERATED_COMPOSITING) && USE(TEXTURE_MAPPER)
 void MediaPlayerPrivateWYMediaPlayer::paintToTextureMapper(TextureMapper* textureMapper, const FloatRect& targetRect, const TransformationMatrix& matrix, float opacity, BitmapTexture*) const
 {
-//    printf("%s:%s():%d : MediaPlayerPrivateWYMediaPlayer::paintToTextureMapper()\n", __FILE__, __FUNCTION__, __LINE__);
-        GraphicsContext* context = textureMapper->graphicsContext();
-        QPainter* painter = context->platformContext();
-        painter->save();
-        painter->setTransform(matrix);
-        painter->setOpacity(opacity);
-        IntRect r(targetRect.x(), targetRect.y(), targetRect.width(), targetRect.height());
-        renderVideoFrame(context, r);
-        painter->restore();
+    //printf("%s:%s():%d : MediaPlayerPrivateWYMediaPlayer::paintToTextureMapper()\n", __FILE__, __FUNCTION__, __LINE__);
+    GraphicsContext* context = textureMapper->graphicsContext();
+    QPainter* painter = context->platformContext();
+    painter->save();
+    painter->setTransform(matrix);
+    painter->setOpacity(opacity);
+    IntRect r(targetRect.x(), targetRect.y(), targetRect.width(), targetRect.height());
+    renderVideoFrame(context, r);
+    painter->restore();
 }
 #endif
 
@@ -1043,17 +1043,20 @@ void MediaPlayerPrivateWYMediaPlayer::paint(GraphicsContext* c, const IntRect& r
         GLuint textureId = 0;
         GLuint* pTex = &textureId;
         bool result = m_spWebkitMediaPlayer->videoFrame((void**)&pTex, 0,0,0,0);
-        if (result) {
+        if (result && pTex && *pTex)
+        { // draw a captured frame
             l_pPainter->save();
             l_pPainter->scale(1.0, -1.0);
             QGLContext *l_pContext = const_cast<QGLContext*>(QGLContext::currentContext());
             l_pContext->drawTexture(QRectF(r.x(),-r.y()-r.height(), r.width(), r.height()), textureId, GL_TEXTURE_2D);
             l_pPainter->restore();
         }
-        else
+        else  // draw black, either because we don't have any frame, or because of error
         {
-            l_pPainter->fillRect ( QRectF(r.x(), r.y(), r.height(), r.width()), QColor(0,0,0,0));
-            WYTRACE_DEBUG("Paint area returned false\n");
+            l_pPainter->save();
+            l_pPainter->setCompositionMode (QPainter::CompositionMode_Clear);
+            l_pPainter->fillRect ( QRectF(r.x(), r.y(), r.width(), r.height()), QColor(0,0,0,0));
+            l_pPainter->restore();
         }
     }
     WYTRACE_DEBUG("OUT Paint area : (%d, %d) - (%d x %d) disabled %i visible %i\n", r.x(), r.y(), r.width(), r.height(), c->paintingDisabled(), m_webCorePlayer->visible());
