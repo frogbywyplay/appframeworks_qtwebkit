@@ -14,7 +14,7 @@ WEBKIT += javascriptcore
 
 CONFIG += staticlib
 
-DEFINES += QT_MAKEDLL
+!static: DEFINES += QT_MAKEDLL
 
 !haveQt(5) {
     INCLUDEPATH += $$PWD/../WTF/wtf/qt/compat
