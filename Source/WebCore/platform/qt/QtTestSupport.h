@@ -24,10 +24,14 @@
 
 #include <QtCore/qglobal.h>
 
-#if defined(BUILDING_WEBKIT)
-#define TESTSUPPORT_EXPORT Q_DECL_EXPORT
+#ifndef QT_STATIC
+#  if defined(BUILDING_WEBKIT)
+#      define TESTSUPPORT_EXPORT Q_DECL_EXPORT
+#  else
+#      define TESTSUPPORT_EXPORT Q_DECL_IMPORT
+#  endif
 #else
-#define TESTSUPPORT_EXPORT Q_DECL_IMPORT
+#  define TESTSUPPORT_EXPORT
 #endif
 
 // Helpers for test runners (DumpRenderTree and WebKitTestRunner).
