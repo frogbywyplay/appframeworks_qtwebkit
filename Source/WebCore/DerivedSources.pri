@@ -826,7 +826,7 @@ GENERATORS += arrayBufferViewCustomScript
 
 # GENERATOR 4: CSS grammar
 # Moc from Qt4 can not handle YACC files. Fortunately it seems preprocessing is not always required.
-win32-* {
+win32-msvc* {
     CSSBISON_PREPROCESSOR = --preprocessor \"cl -E\"
 } else {
     CSSBISON_PREPROCESSOR = 
