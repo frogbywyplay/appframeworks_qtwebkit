@@ -4100,7 +4100,7 @@ contains(DEFINES, WTF_USE_WEBP=1) {
     SOURCES += $${SQLITE3SRCDIR}/sqlite3.c
 }
 
-win32:!win32-g++*:contains(QMAKE_HOST.arch, x86_64):{
+win32:!win32-g++*:contains(QMAKE_TARGET.arch, x86_64):{
     asm_compiler.commands = ml64 /c
     asm_compiler.commands +=  /Fo ${QMAKE_FILE_OUT} ${QMAKE_FILE_IN}
     asm_compiler.output = ${QMAKE_VAR_OBJECTS_DIR}${QMAKE_FILE_BASE}$${first(QMAKE_EXT_OBJ)}
@@ -4112,7 +4112,7 @@ win32:!win32-g++*:contains(QMAKE_HOST.arch, x86_64):{
 
     ASM_SOURCES += \
         plugins/win/PaintHooks.asm
-   if(win32-msvc2005|win32-msvc2008):equals(TEMPLATE_PREFIX, "vc") {
+   if(win32-msvc*):equals(TEMPLATE_PREFIX, "vc") {
         SOURCES += \
             plugins/win/PaintHooks.asm
    }
