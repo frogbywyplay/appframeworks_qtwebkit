@@ -285,7 +285,7 @@ haveQt(5) {
         LIBS += -lwebp
     }
 } else {
-    !win32-*:!mac {
+    !win32-*:!mac:!contains(DEFINES, WTF_USE_LIBJPEG=.):!contains(DEFINES, WTF_USE_LIBPNG=.) {
         DEFINES += WTF_USE_LIBJPEG=1 WTF_USE_LIBPNG=1
         LIBS += -ljpeg -lpng
     }
