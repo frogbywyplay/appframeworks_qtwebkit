@@ -447,6 +447,7 @@ int windowsKeyCodeForKeyEvent(unsigned int keycode, bool isKeypad)
     case Qt::Key_MediaStop:
         return VK_MEDIA_STOP; // (B2) Windows 2000/XP: Stop Media key
     case Qt::Key_MediaTogglePlayPause:
+    case Qt::Key_MediaPlay:
         return VK_MEDIA_PLAY_PAUSE; // (B3) Windows 2000/XP: Play/Pause Media key
 
         // VK_LAUNCH_MAIL (B4) Windows 2000/XP: Start Mail key
