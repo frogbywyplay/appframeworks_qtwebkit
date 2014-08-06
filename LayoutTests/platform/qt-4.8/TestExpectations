@@ -234,7 +234,6 @@ fast/writing-mode/flipped-blocks-hit-test-line-edges.html
 # due to this we are skipping tons of tests. They will be unskipped in batches ASAP.
 # https://bugs.webkit.org/show_bug.cgi?id=85203
 css1/font_properties/font.html [ Failure ]
-css1/font_properties/font_variant.html [ Failure ]
 css1/pseudo/firstline.html [ Failure ]
 css1/pseudo/multiple_pseudo_elements.html [ Failure ]
 css1/text_properties/letter_spacing.html [ Failure ]
@@ -417,7 +416,6 @@ fast/table/border-collapsing/004.html [ Failure ]
 fast/table/colspanMinWidth.html [ Failure ]
 fast/table/spanOverlapRepaint.html [ Failure ]
 fast/table/text-field-baseline.html [ Failure ]
-fast/text/atsui-small-caps-punctuation-size.html [ Failure ]
 fast/text/backslash-to-yen-sign-euc.html [ Failure ]
 fast/text/backslash-to-yen-sign.html [ Failure ]
 fast/text/basic/003.html [ Failure ]
