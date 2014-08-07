@@ -62,9 +62,9 @@ struct FontPlatformDataCacheKey {
 public:
     FontPlatformDataCacheKey(const AtomicString& family = AtomicString(), unsigned size = 0, unsigned weight = 0, bool italic = false,
                              bool isPrinterFont = false, FontRenderingMode renderingMode = NormalRenderingMode, FontOrientation orientation = Horizontal,
-                             TextOrientation textOrientation = TextOrientationVerticalRight, FontWidthVariant widthVariant = RegularWidth,
+                             TextOrientation textOrientation = TextOrientationVerticalRight, FontWidthVariant widthVariant = RegularWidth
 #if PLATFORM(QT) && !HAVE(QRAWFONT)
-                             bool smallCaps = false
+                             , bool smallCaps = false
 #endif
                             )
         : m_size(size)

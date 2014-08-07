@@ -4094,6 +4094,11 @@ contains(DEFINES, WTF_USE_WEBP=1) {
     SOURCES += platform/image-decoders/webp/WEBPImageDecoder.cpp
 }
 
+contains(DEFINES, WTF_USE_ZLIB=1) {
+    HEADERS += platform/graphics/WOFFFileFormat.h
+    SOURCES += platform/graphics/WOFFFileFormat.cpp
+}
+
 !contains(DEFINES, HAVE_SQLITE3=1):exists($${SQLITE3SRCDIR}/sqlite3.c) {
     # Build sqlite3 into WebCore from source
     # somewhat copied from $$QT_SOURCE_TREE/src/plugins/sqldrivers/sqlite/sqlite.pro
