@@ -364,6 +364,11 @@ sub determineNumberOfCPUs
     }
 }
 
+if (!defined($numberOfCPUs) or $numberOfCPUs eq "")
+{
+    $numberOfCPUs = "1";
+}
+
 sub jscPath($)
 {
     my ($productDir) = @_;
