@@ -65,6 +65,12 @@
 #define WTF_CPU_ALPHA 1
 #endif
 
+/* CPU(HPPA) - HP PARISC */
+#if defined(__hppa__)
+#define WTF_CPU_HPPA 1
+#define WTF_CPU_BIG_ENDIAN 1
+#endif
+
 /* CPU(IA64) - Itanium / IA-64 */
 #if defined(__ia64__)
 #define WTF_CPU_IA64 1
