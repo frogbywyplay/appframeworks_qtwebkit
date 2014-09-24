@@ -187,7 +187,13 @@ contains(DEFINES, ENABLE_GLIB_SUPPORT=1) {
 }
 
 contains(DEFINES, WTF_USE_GSTREAMER=1) {
-    PKGCONFIG += gstreamer-0.10 gstreamer-app-0.10 gstreamer-base-0.10 gstreamer-interfaces-0.10 gstreamer-pbutils-0.10 gstreamer-plugins-base-0.10 gstreamer-video-0.10
+    contains(DEFINES, WTF_USE_GSTREAMER010=1) {
+        PKGCONFIG += gstreamer-0.10 gstreamer-app-0.10 gstreamer-base-0.10 gstreamer-interfaces-0.10 gstreamer-pbutils-0.10 gstreamer-plugins-base-0.10 gstreamer-video-0.10
+    } else {
+        DEFINES += GST_API_VERSION=1.0
+        DEFINES += GST_API_VERSION_1
+        PKGCONFIG += gstreamer-1.0 gstreamer-app-1.0 gstreamer-base-1.0 gstreamer-pbutils-1.0 gstreamer-plugins-base-1.0 gstreamer-video-1.0 gstreamer-audio-1.0
+    }
 }
 
 contains(DEFINES, ENABLE_VIDEO=1) {
@@ -223,7 +229,11 @@ contains(DEFINES, ENABLE_WEB_AUDIO=1) {
     contains(DEFINES, WTF_USE_GSTREAMER=1) {
         DEFINES += WTF_USE_WEBAUDIO_GSTREAMER=1
         INCLUDEPATH += $$SOURCE_DIR/platform/audio/gstreamer
-        PKGCONFIG += gstreamer-audio-0.10 gstreamer-fft-0.10
+        contains(DEFINES, WTF_USE_GSTREAMER010=1) {
+            PKGCONFIG += gstreamer-audio-0.10 gstreamer-fft-0.10
+        } else {
+            PKGCONFIG += gstreamer-audio-1.0 gstreamer-fft-1.0
+        }
     }
 }
 
