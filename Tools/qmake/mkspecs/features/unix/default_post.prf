@@ -12,8 +12,8 @@
 !no_force_sse2:contains(QMAKE_CXXFLAGS, -march): CONFIG += no_force_sse2
 
 !no_force_sse2:linux-g++*:isEqual(QT_ARCH,i386) {
-    QMAKE_CFLAGS += -march=pentium4 -msse2 -mfpmath=sse -mtune=generic
-    QMAKE_CXXFLAGS += -march=pentium4 -msse2 -mfpmath=sse -mtune=generic
+    QMAKE_CFLAGS += -msse2 -mfpmath=sse
+    QMAKE_CXXFLAGS += -msse2 -mfpmath=sse
 }
 
 linux-*g++* {
