@@ -182,9 +182,12 @@ contains(DEFINES, ENABLE_GAMEPAD=1) {
     PKGCONFIG += libudev
 }
 
+contains(DEFINES, ENABLE_GLIB_SUPPORT=1) {
+    PKGCONFIG += glib-2.0 gio-2.0
+}
+
 contains(DEFINES, WTF_USE_GSTREAMER=1) {
-    DEFINES += ENABLE_GLIB_SUPPORT=1
-    PKGCONFIG += glib-2.0 gio-2.0 gstreamer-0.10 gstreamer-app-0.10 gstreamer-base-0.10 gstreamer-interfaces-0.10 gstreamer-pbutils-0.10 gstreamer-plugins-base-0.10 gstreamer-video-0.10
+    PKGCONFIG += gstreamer-0.10 gstreamer-app-0.10 gstreamer-base-0.10 gstreamer-interfaces-0.10 gstreamer-pbutils-0.10 gstreamer-plugins-base-0.10 gstreamer-video-0.10
 }
 
 contains(DEFINES, ENABLE_VIDEO=1) {
