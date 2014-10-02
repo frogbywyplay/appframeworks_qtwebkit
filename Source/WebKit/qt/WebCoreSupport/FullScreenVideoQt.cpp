@@ -30,7 +30,7 @@
 #include "HTMLVideoElement.h"
 #include "Node.h"
 
-#if USE(GSTREAMER)
+#if USE(GSTREAMER) && !defined(GST_API_VERSION_1)
 #include "GStreamerGWorld.h"
 #include "PlatformVideoWindowPrivate.h"
 #endif
