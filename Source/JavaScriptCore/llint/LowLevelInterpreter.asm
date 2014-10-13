@@ -87,6 +87,12 @@ else
     const PayloadOffset = 0
 end
 
+if JSVALUE64
+    const JSCellPayloadOffset = 0
+else
+    const JSCellPayloadOffset = PayloadOffset
+end
+
 # Constant for reasoning about butterflies.
 const IsArray                  = 1
 const IndexingShapeMask        = 30
@@ -160,7 +166,6 @@ if JSVALUE64
 else
     const VectorBufferOffset = 4
 end
-
 
 # Some common utilities.
 macro crash()
@@ -263,13 +268,13 @@ macro assertNotConstant(index)
 end
 
 macro functionForCallCodeBlockGetter(targetRegister)
-    loadp Callee[cfr], targetRegister
+    loadp Callee + JSCellPayloadOffset[cfr], targetRegister
     loadp JSFunction::m_executable[targetRegister], targetRegister
     loadp FunctionExecutable::m_codeBlockForCall[targetRegister], targetRegister
 end
 
 macro functionForConstructCodeBlockGetter(targetRegister)
-    loadp Callee[cfr], targetRegister
+    loadp Callee + JSCellPayloadOffset[cfr], targetRegister
     loadp JSFunction::m_executable[targetRegister], targetRegister
     loadp FunctionExecutable::m_codeBlockForConstruct[targetRegister], targetRegister
 end
@@ -684,7 +689,7 @@ _llint_op_resolve_global_var:
 macro resolveScopedVarBody(resolveOperations)
     # First ResolveOperation is to skip scope chain nodes
     getScope(macro(dest)
-                 loadp ScopeChain + PayloadOffset[cfr], dest
+                 loadp ScopeChain + JSCellPayloadOffset[cfr], dest
              end,
              ResolveOperation::m_scopesToSkip[resolveOperations], t1, t2)
     loadp JSVariableObject::m_registers[t1], t1 # t1 now contains the activation registers
@@ -709,7 +714,7 @@ _llint_op_resolve_scoped_var_on_top_scope:
     loadisFromInstruction(1, t3)
 
     # We know we want the top scope chain entry
-    loadp ScopeChain + PayloadOffset[cfr], t1
+    loadp ScopeChain + JSCellPayloadOffset[cfr], t1
     loadp JSVariableObject::m_registers[t1], t1 # t1 now contains the activation registers
     
     # Second ResolveOperation tells us what offset to use
@@ -731,7 +736,7 @@ _llint_op_resolve_scoped_var_with_top_scope_check:
                      loadp JSScope::m_next[t1], dest
                  jmp .done
                  .scopeChainNotCreated:
-                     loadp ScopeChain + PayloadOffset[cfr], dest
+                     loadp ScopeChain + JSCellPayloadOffset[cfr], dest
                  .done:
              end, 
              # Second ResolveOperation tells us how many more nodes to skip
@@ -786,7 +791,7 @@ _llint_op_resolve_base_to_scope:
     getResolveOperation(4, t0, t1)
     # First ResolveOperation is to skip scope chain nodes
     getScope(macro(dest)
-                 loadp ScopeChain + PayloadOffset[cfr], dest
+                 loadp ScopeChain + JSCellPayloadOffset[cfr], dest
              end,
              ResolveOperation::m_scopesToSkip[t0], t1, t2)
     loadisFromInstruction(1, t3)
@@ -811,7 +816,7 @@ _llint_op_resolve_base_to_scope_with_top_scope_check:
                      loadp JSScope::m_next[t1], dest
                  jmp .done
                  .scopeChainNotCreated:
-                     loadp ScopeChain + PayloadOffset[cfr], dest
+                     loadp ScopeChain + JSCellPayloadOffset[cfr], dest
                  .done:
              end, 
              # Second ResolveOperation tells us how many more nodes to skip
@@ -841,7 +846,7 @@ macro interpretResolveWithBase(opcodeLength, slowPath)
     getResolveOperation(4, t0, t1)
     btpz t0, .slowPath
 
-    loadp ScopeChain[cfr], t3
+    loadp ScopeChain + JSCellPayloadOffset[cfr], t3
     # Get the base
     loadis ResolveOperation::m_operation[t0], t2
 
@@ -863,7 +868,7 @@ macro interpretResolveWithBase(opcodeLength, slowPath)
                          loadp JSScope::m_next[t1], dest
                      jmp .done
                      .scopeChainNotCreated:
-                         loadp ScopeChain + PayloadOffset[cfr], dest
+                         loadp ScopeChain + JSCellPayloadOffset[cfr], dest
                      .done:
                  end,
                  sizeof ResolveOperation + ResolveOperation::m_scopesToSkip[t0], t1, t2)
