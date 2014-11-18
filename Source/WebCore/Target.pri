@@ -14,7 +14,7 @@ WEBKIT += javascriptcore
 
 CONFIG += staticlib
 
-DEFINES += QT_MAKEDLL
+!static: DEFINES += QT_MAKEDLL
 
 !haveQt(5) {
     INCLUDEPATH += $$PWD/../WTF/wtf/qt/compat
@@ -4105,13 +4105,18 @@ contains(DEFINES, WTF_USE_WEBP=1) {
     SOURCES += platform/image-decoders/webp/WEBPImageDecoder.cpp
 }
 
+contains(DEFINES, WTF_USE_ZLIB=1) {
+    HEADERS += platform/graphics/WOFFFileFormat.h
+    SOURCES += platform/graphics/WOFFFileFormat.cpp
+}
+
 !contains(DEFINES, HAVE_SQLITE3=1):exists($${SQLITE3SRCDIR}/sqlite3.c) {
     # Build sqlite3 into WebCore from source
     # somewhat copied from $$QT_SOURCE_TREE/src/plugins/sqldrivers/sqlite/sqlite.pro
     SOURCES += $${SQLITE3SRCDIR}/sqlite3.c
 }
 
-win32:!win32-g++*:contains(QMAKE_HOST.arch, x86_64):{
+win32:!win32-g++*:contains(QMAKE_TARGET.arch, x86_64):{
     asm_compiler.commands = ml64 /c
     asm_compiler.commands +=  /Fo ${QMAKE_FILE_OUT} ${QMAKE_FILE_IN}
     asm_compiler.output = ${QMAKE_VAR_OBJECTS_DIR}${QMAKE_FILE_BASE}$${first(QMAKE_EXT_OBJ)}
@@ -4123,7 +4128,7 @@ win32:!win32-g++*:contains(QMAKE_HOST.arch, x86_64):{
 
     ASM_SOURCES += \
         plugins/win/PaintHooks.asm
-   if(win32-msvc2005|win32-msvc2008):equals(TEMPLATE_PREFIX, "vc") {
+   if(win32-msvc*):equals(TEMPLATE_PREFIX, "vc") {
         SOURCES += \
             plugins/win/PaintHooks.asm
    }

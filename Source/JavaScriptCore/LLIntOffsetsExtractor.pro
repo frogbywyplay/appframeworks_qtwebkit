@@ -8,7 +8,7 @@
 TEMPLATE = app
 TARGET = LLIntOffsetsExtractor
 
-macx: DESTDIR = $$activeBuildConfig()
+macx: DESTDIR = $$targetBuildConfig()
 
 debug_and_release {
     CONFIG += force_build_all

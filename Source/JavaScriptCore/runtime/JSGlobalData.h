@@ -47,6 +47,7 @@
 #include "TypedArrayDescriptor.h"
 #include "WeakRandom.h"
 #include <wtf/BumpPointerAllocator.h>
+#include <wtf/DateMath.h>
 #include <wtf/Forward.h>
 #include <wtf/HashMap.h>
 #include <wtf/SimpleStats.h>
@@ -89,21 +90,23 @@ namespace JSC {
     struct HashTable;
     struct Instruction;
 
-    struct DSTOffsetCache {
-        DSTOffsetCache()
+    struct LocalTimeOffsetCache {
+        LocalTimeOffsetCache()
+            : start(0.0)
+            , end(-1.0)
+            , increment(0.0)
         {
-            reset();
         }
-        
+
         void reset()
         {
-            offset = 0.0;
+            offset = LocalTimeOffset();
             start = 0.0;
             end = -1.0;
             increment = 0.0;
         }
 
-        double offset;
+        LocalTimeOffset offset;
         double start;
         double end;
         double increment;
@@ -349,8 +352,7 @@ namespace JSC {
 
         HashSet<JSObject*> stringRecursionCheckVisitedObjects;
 
-        double cachedUTCOffset;
-        DSTOffsetCache dstOffsetCache;
+        LocalTimeOffsetCache localTimeOffsetCache;
         
         String cachedDateString;
         double cachedDateStringValue;

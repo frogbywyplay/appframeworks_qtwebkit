@@ -22,9 +22,9 @@
 
 #include <QtCore/qglobal.h>
 
-#define QTWEBKIT_VERSION_STR "2.3.4"
+#define QTWEBKIT_VERSION_STR "2.3.5"
 // QTWEBKIT_VERSION is (major << 16) + (minor << 8) + patch. Similar to Qt.
-#define QTWEBKIT_VERSION 0x020304
+#define QTWEBKIT_VERSION 0x020305
 // Use: #if (QTWEBKIT_VERSION >= QTWEBKIT_VERSION_CHECK(2, 0, 0)). Similar to Qt.
 #define QTWEBKIT_VERSION_CHECK(major, minor, patch) ((major<<16)|(minor<<8)|(patch))
 

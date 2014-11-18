@@ -108,6 +108,7 @@ typedef void DFG_OPERATION (*V_DFGOperation_EJPP)(ExecState*, EncodedJSValue, En
 typedef void DFG_OPERATION (*V_DFGOperation_EPZJ)(ExecState*, void*, int32_t, EncodedJSValue);
 typedef void DFG_OPERATION (*V_DFGOperation_W)(WatchpointSet*);
 typedef char* DFG_OPERATION (*P_DFGOperation_E)(ExecState*);
+typedef char* DFG_OPERATION (*P_DFGOperation_EC)(ExecState*, JSCell*);
 typedef char* DFG_OPERATION (*P_DFGOperation_EO)(ExecState*, JSObject*);
 typedef char* DFG_OPERATION (*P_DFGOperation_EOS)(ExecState*, JSObject*, size_t);
 typedef char* DFG_OPERATION (*P_DFGOperation_EOZ)(ExecState*, JSObject*, int32_t);
@@ -202,10 +203,10 @@ char* DFG_OPERATION operationAllocatePropertyStorageWithInitialCapacity(ExecStat
 char* DFG_OPERATION operationAllocatePropertyStorage(ExecState*, size_t newSize) WTF_INTERNAL;
 char* DFG_OPERATION operationReallocateButterflyToHavePropertyStorageWithInitialCapacity(ExecState*, JSObject*) WTF_INTERNAL;
 char* DFG_OPERATION operationReallocateButterflyToGrowPropertyStorage(ExecState*, JSObject*, size_t newSize) WTF_INTERNAL;
-char* DFG_OPERATION operationEnsureInt32(ExecState*, JSObject*);
-char* DFG_OPERATION operationEnsureDouble(ExecState*, JSObject*);
-char* DFG_OPERATION operationEnsureContiguous(ExecState*, JSObject*);
-char* DFG_OPERATION operationEnsureArrayStorage(ExecState*, JSObject*);
+char* DFG_OPERATION operationEnsureInt32(ExecState*, JSCell*);
+char* DFG_OPERATION operationEnsureDouble(ExecState*, JSCell*);
+char* DFG_OPERATION operationEnsureContiguous(ExecState*, JSCell*);
+char* DFG_OPERATION operationEnsureArrayStorage(ExecState*, JSCell*);
 
 // This method is used to lookup an exception hander, keyed by faultLocation, which is
 // the return location from one of the calls out to one of the helper operations above.

@@ -103,7 +103,7 @@ public:
 
 private:
     TextureMapperTiledBackingStore();
-    void createOrDestroyTilesIfNeeded(const FloatSize& backingStoreSize, const IntSize& tileSize, bool hasAlpha);
+    void createOrDestroyTilesIfNeeded(const FloatSize& backingStoreSize, const IntSize& tileSize, bool hasAlpha, IntRect& repaintRect);
     void updateContentsFromImageIfNeeded(TextureMapper*);
     inline FloatRect rect() const { return FloatRect(FloatPoint::zero(), m_size); }
 

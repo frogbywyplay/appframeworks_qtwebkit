@@ -185,10 +185,16 @@ haveQt(5) {
             DEFINES += ENABLE_VIDEO=1
             DEFINES += WTF_USE_QTKIT=1
         }
-    } else: linux-*:!contains(DEFINES, USE_QTMULTIMEDIA=1) {
-        !contains(QT_CONFIG, no-pkg-config):system(pkg-config --exists glib-2.0 gio-2.0 \'gstreamer-0.10 >= 0.10.30\' \'gstreamer-plugins-base-0.10 >= 0.10.30\'): {
+    } else: unix:!contains(DEFINES, USE_QTMULTIMEDIA=1):!contains(QT_CONFIG, no-pkg-config) {
+        packagesExist("glib-2.0 gio-2.0 gstreamer-1.0 gstreamer-plugins-base-1.0") {
             DEFINES += ENABLE_VIDEO=1
             DEFINES += WTF_USE_GSTREAMER=1
+            DEFINES += ENABLE_GLIB_SUPPORT=1
+        } else: packagesExist("glib-2.0 gio-2.0 \'gstreamer-0.10 >= 0.10.30\' \'gstreamer-plugins-base-0.10 >= 0.10.30\'") {
+            DEFINES += ENABLE_VIDEO=1
+            DEFINES += WTF_USE_GSTREAMER=1
+            DEFINES += WTF_USE_GSTREAMER010=1
+            DEFINES += ENABLE_GLIB_SUPPORT=1
         } else {
             root_project_file: message("Missing GLib/Gio/GStreamer, disabling media element support")
         }

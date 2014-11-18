@@ -930,6 +930,8 @@ void JSObject::convertDoubleToContiguousWhilePerformingSetIndex(JSGlobalData& gl
 
 WriteBarrier<Unknown>* JSObject::ensureInt32Slow(JSGlobalData& globalData)
 {
+    ASSERT(inherits(&s_info));
+
     switch (structure()->indexingType()) {
     case ALL_BLANK_INDEXING_TYPES:
         if (UNLIKELY(indexingShouldBeSparse() || structure()->needsSlowPutIndexing()))
@@ -952,6 +954,8 @@ WriteBarrier<Unknown>* JSObject::ensureInt32Slow(JSGlobalData& globalData)
 
 double* JSObject::ensureDoubleSlow(JSGlobalData& globalData)
 {
+    ASSERT(inherits(&s_info));
+
     switch (structure()->indexingType()) {
     case ALL_BLANK_INDEXING_TYPES:
         if (UNLIKELY(indexingShouldBeSparse() || structure()->needsSlowPutIndexing()))
@@ -976,6 +980,8 @@ double* JSObject::ensureDoubleSlow(JSGlobalData& globalData)
 
 WriteBarrier<Unknown>* JSObject::ensureContiguousSlow(JSGlobalData& globalData)
 {
+    ASSERT(inherits(&s_info));
+
     switch (structure()->indexingType()) {
     case ALL_BLANK_INDEXING_TYPES:
         if (UNLIKELY(indexingShouldBeSparse() || structure()->needsSlowPutIndexing()))
@@ -1002,6 +1008,8 @@ WriteBarrier<Unknown>* JSObject::ensureContiguousSlow(JSGlobalData& globalData)
 
 ArrayStorage* JSObject::ensureArrayStorageSlow(JSGlobalData& globalData)
 {
+    ASSERT(inherits(&s_info));
+
     switch (structure()->indexingType()) {
     case ALL_BLANK_INDEXING_TYPES:
         if (UNLIKELY(indexingShouldBeSparse()))

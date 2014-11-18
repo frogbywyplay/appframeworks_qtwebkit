@@ -19,6 +19,8 @@
 
 #ifndef PlatformVideoWindowPrivate_h
 #define PlatformVideoWindowPrivate_h
+// We do not use ENABLE or USE because moc does not expand these macros.
+#if defined(WTF_USE_GSTREAMER) && WTF_USE_GSTREAMER && !defined(GST_API_VERSION_1)
 
 #include <QEvent>
 #include <QTimer>
@@ -65,5 +67,6 @@ private:
 
 } // namespace WebCore
 
+#endif // USE(GSTREAMER) && !defined(GST_API_VERSION_1)
 
 #endif // PlatformVideoWindowPrivate_h

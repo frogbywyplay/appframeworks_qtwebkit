@@ -24,6 +24,9 @@
 
 #include "FontPlatformData.h"
 #include "SharedBuffer.h"
+#if USE(ZLIB)
+#include "WOFFFileFormat.h"
+#endif
 #if !HAVE(QRAWFONT)
 #include <QFontDatabase>
 #endif
@@ -73,7 +76,25 @@ FontCustomPlatformData* createFontCustomPlatformData(SharedBuffer* buffer)
 {
     ASSERT_ARG(buffer, buffer);
 
+#if USE(ZLIB)
+    RefPtr<SharedBuffer> sfntBuffer;
+    if (isWOFF(buffer)) {
+        Vector<char> sfnt;
+        if (!convertWOFFToSfnt(buffer, sfnt))
+            return 0;
+
+        sfntBuffer = SharedBuffer::adoptVector(sfnt);
+        buffer = sfntBuffer.get();
+    }
+#endif // USE(ZLIB)
+
     const QByteArray fontData(buffer->data(), buffer->size());
+#if !USE(ZLIB)
+    if (fontData.startsWith("wOFF")) {
+        qWarning("WOFF support requires QtWebKit to be built with zlib support.");
+        return 0;
+    }
+#endif // !USE(ZLIB)
 #if !HAVE(QRAWFONT)
     int id = QFontDatabase::addApplicationFontFromData(fontData);
     if (id == -1)
@@ -101,7 +122,11 @@ FontCustomPlatformData* createFontCustomPlatformData(SharedBuffer* buffer)
 
 bool FontCustomPlatformData::supportsFormat(const String& format)
 {
-    return equalIgnoringCase(format, "truetype") || equalIgnoringCase(format, "opentype");
+    return equalIgnoringCase(format, "truetype") || equalIgnoringCase(format, "opentype")
+#if USE(ZLIB)
+            || equalIgnoringCase(format, "woff")
+#endif
+    ;
 }
 
 }

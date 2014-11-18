@@ -172,7 +172,6 @@ JSGlobalData::JSGlobalData(GlobalDataType globalDataType, HeapType heapType)
     , sizeOfLastScratchBuffer(0)
 #endif
     , dynamicGlobalObject(0)
-    , cachedUTCOffset(QNaN)
     , m_enabledProfiler(0)
     , m_regExpCache(new RegExpCache(this))
 #if ENABLE(REGEXP_TRACING)
@@ -408,8 +407,7 @@ JSGlobalData::ClientData::~ClientData()
 
 void JSGlobalData::resetDateCache()
 {
-    cachedUTCOffset = QNaN;
-    dstOffsetCache.reset();
+    localTimeOffsetCache.reset();
     cachedDateString = String();
     cachedDateStringValue = QNaN;
     dateInstanceCache.reset();
