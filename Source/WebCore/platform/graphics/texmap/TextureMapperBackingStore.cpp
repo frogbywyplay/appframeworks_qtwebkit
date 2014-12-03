@@ -185,9 +185,15 @@ void TextureMapperTiledBackingStore::createOrDestroyTilesIfNeeded(const FloatSiz
         // This tile is not needed.
         if (!existsAlready) {
             tileIndicesToRemove.append(i);
-            // If the removed tile was painted ensure the area it covered is repainted.
-            if (m_tiles[i].texture())
-                repaintRect.unite(enclosingIntRect(oldTile));
+            // If the removed tile was painted ensure the area it covered is repainted. However the
+            // resulting repaint rect must never cross the rect() boundaries as other functions
+            // using it wont check if it expands it too much, leading to memory corruption during
+            // copy operations.
+            if (m_tiles[i].texture()) {
+                FloatRect oldTileX(oldTile);
+                oldTileX.intersect(rect());
+                repaintRect.unite(enclosingIntRect(oldTileX));
+            }
         }
     }
 
