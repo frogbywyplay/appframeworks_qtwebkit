@@ -19,11 +19,11 @@
 
 using namespace WebCore;
 
-#ifdef ENABLE_DFB_SUPPORT
+#if ENABLE(DFB_SUPPORT)
 #if USE(ACCELERATED_COMPOSITING) && USE(TEXTURE_MAPPER)
 #include "texmap/TextureMapper.h"
 #endif
-#endif //ENABLE_DFB_SUPPORT
+#endif // ENABLE_DFB_SUPPORT
 
 //////////////////////////////////////////
 // ImageWYMediaPlayer class
@@ -32,7 +32,7 @@ using namespace WebCore;
 //#include "GOwnPtr.h"
 #include <wtf/PassRefPtr.h>
 
-#ifdef ENABLE_DFB_SUPPORT
+#if ENABLE(DFB_SUPPORT)
 #if PLATFORM(CAIRO)
 #include <cairo.h>
 #include <cairo-directfb.h>
@@ -48,7 +48,7 @@ using namespace WebCore;
 #include <QGLContext>
 #endif // ENABLE_OPENGL_SUPPORT
 
-#ifdef ENABLE_DFB_SUPPORT
+#if ENABLE(DFB_SUPPORT)
 #if PLATFORM(QT)
 #include <QImageReader>
 #endif
@@ -248,7 +248,7 @@ MediaPlayer::SupportsType MediaPlayerPrivateWYMediaPlayer::supportsType(const St
 MediaPlayerPrivateWYMediaPlayer::MediaPlayerPrivateWYMediaPlayer(MediaPlayer* player)
     : m_webCorePlayer(player)
     , m_threadCreator(currentThread())
-#ifdef ENABLE_DFB_SUPPORT
+#if ENABLE(DFB_SUPPORT)
 #if PLATFORM(QT)
     , m_pVideoItem(NULL)
 #endif
@@ -283,7 +283,7 @@ bool MediaPlayerPrivateWYMediaPlayer::init()
         WYTRACE_ERROR("(!doWYMediaPlayerInit())\n");
         return false;
     }
-#ifdef ENABLE_DFB_SUPPORT
+#if ENABLE(DFB_SUPPORT)
     DirectFBCreate(&m_pDirectFB);
     if (m_pDirectFB == NULL)
     {
@@ -334,7 +334,7 @@ bool MediaPlayerPrivateWYMediaPlayer::init()
     m_fChangedVolume = 0.0f;
     m_bMutedValue = false;
 
-#ifdef ENABLE_DFB_SUPPORT
+#if ENABLE(DFB_SUPPORT)
 #if PLATFORM(QT)
     m_pVideoItem = new QWYVideoItem(this);
 #endif
@@ -347,7 +347,7 @@ bool MediaPlayerPrivateWYMediaPlayer::uninit()
 {
     WY_TRACK(MediaPlayerPrivateWYMediaPlayer);
 
-#ifdef ENABLE_DFB_SUPPORT
+#if ENABLE(DFB_SUPPORT)
 #if PLATFORM(QT)
     if (m_pVideoItem)
     {
@@ -378,7 +378,7 @@ bool MediaPlayerPrivateWYMediaPlayer::uninit()
     g_spMediaPlayersManager->deletePlayer(m_spMediaPlayer);
     m_spMediaPlayer->release();
 
-#ifdef ENABLE_DFB_SUPPORT
+#if ENABLE(DFB_SUPPORT)
     if (m_pDirectFB)
     {
         m_pDirectFB->Release(m_pDirectFB);
@@ -1033,7 +1033,7 @@ void MediaPlayerPrivateWYMediaPlayer::paint(GraphicsContext* c, const IntRect& r
     if (!m_webCorePlayer->visible())
         return;
 
-#ifdef ENABLE_DFB_SUPPORT
+#if ENABLE(DFB_SUPPORT)
     renderVideoFrame(c, r);
 #else // ENABLE_DFB_SUPPORT
     QPainter *l_pPainter = static_cast<QPainter*>(c->platformContext());

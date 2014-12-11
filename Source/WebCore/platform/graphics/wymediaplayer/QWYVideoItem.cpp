@@ -7,7 +7,7 @@
 #include "config.h"
 #include "QWYVideoItem.h"
 
-#ifdef ENABLE_DFB_SUPPORT
+#if ENABLE(DFB_SUPPORT)
 #include "MediaPlayerPrivateWYMediaPlayer.h"
 #include <stdio.h>
 

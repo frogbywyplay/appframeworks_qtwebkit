@@ -20,13 +20,13 @@
 #include "Timer.h"
 #include "BitmapImage.h"
 
-#ifdef ENABLE_DFB_SUPPORT
+#if ENABLE(DFB_SUPPORT)
 #include <directfb/directfb.h>
 #endif // ENABLE_DFB_SUPPORT
 
 #include <wymediaplayerhelper/wymediaplayerhelper.h>
 
-#ifdef ENABLE_DFB_SUPPORT
+#if ENABLE(DFB_SUPPORT)
 #if USE(ACCELERATED_COMPOSITING) && USE(TEXTURE_MAPPER)
 #include "TextureMapper.h"
 #endif
@@ -45,7 +45,7 @@ class WMPHLayer;
 class MediaPlayerPrivateWYMediaPlayer :
     public MediaPlayerPrivateInterface,
     public IWebkitMediaPlayerEventSink
-#ifdef ENABLE_DFB_SUPPORT
+#if ENABLE(DFB_SUPPORT)
 #if USE(ACCELERATED_COMPOSITING) && USE(TEXTURE_MAPPER)
         , public TextureMapperPlatformLayer
 #endif
@@ -55,7 +55,7 @@ public:
     MediaPlayerPrivateWYMediaPlayer(MediaPlayer* player);
     virtual ~MediaPlayerPrivateWYMediaPlayer();
 
-#ifdef ENABLE_DFB_SUPPORT
+#if ENABLE(DFB_SUPPORT)
 #if PLATFORM(QT)
     friend class QWYVideoItem;
 private:
@@ -74,7 +74,7 @@ private:
 
     WYSmartPtr<IMediaPlayer>            m_spMediaPlayer;
     WYSmartPtr<IWebkitMediaPlayer>      m_spWebkitMediaPlayer;
-#ifdef ENABLE_DFB_SUPPORT
+#if ENABLE(DFB_SUPPORT)
     IDirectFB*                          m_pDirectFB;
 #endif // ENABLE_DFB_SUPPORT
 
@@ -93,7 +93,7 @@ private:
     float   m_fChangedVolume;
     bool    m_bMutedValue;
 
-#ifdef ENABLE_DFB_SUPPORT
+#if ENABLE(DFB_SUPPORT)
 #if PLATFORM(QT)
     QWYVideoItem*   m_pVideoItem;
 #endif
@@ -103,7 +103,7 @@ protected:
     virtual bool init();
     virtual bool uninit();
 
-#ifdef ENABLE_DFB_SUPPORT
+#if ENABLE(DFB_SUPPORT)
             bool renderVideoFrame(GraphicsContext* c, const IntRect& r) const;
             RefPtr<BitmapImage> bitmapImageFromDirectFBSurface(IDirectFBSurface* p_pDirectFBSurface) const;
 #else // ENABLE_DFB_SUPPORT
@@ -134,7 +134,7 @@ public:
     virtual void prepareToPlay();
     virtual PlatformMedia platformMedia() const;
 #if USE(ACCELERATED_COMPOSITING)
-#ifdef ENABLE_DFB_SUPPORT
+#if ENABLE(DFB_SUPPORT)
     virtual PlatformLayer* platformLayer() const { return 0; }
 #if USE(TEXTURE_MAPPER)
     // Const-casting here is safe, since all of TextureMapperPlatformLayer's functions are const.g
@@ -201,7 +201,7 @@ public:
     virtual bool canLoadPoster() const;
     virtual void setPoster(const String&);
 
-#ifdef ENABLE_DFB_SUPPORT
+#if ENABLE(DFB_SUPPORT)
 #if ENABLE(PLUGIN_PROXY_FOR_VIDEO)
     virtual void deliverNotification(MediaPlayerProxyNotificationType) = 0;
     virtual void setMediaPlayerProxy(WebMediaPlayerProxy*) = 0;
@@ -212,7 +212,7 @@ public:
 #endif // ENABLE_DFB_SUPPORT
 
 #if USE(ACCELERATED_COMPOSITING)
-#ifdef ENABLE_DFB_SUPPORT
+#if ENABLE(DFB_SUPPORT)
 
     // whether accelerated rendering is supported by the media engine for the current media.
     virtual bool supportsAcceleratedRendering() const { return false; }
