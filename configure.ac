@@ -487,20 +487,9 @@ if test "$enable_dbus_bridge" = "yes"; then
     AC_DEFINE([ENABLE_DBUS_BRIDGE], [1], [Needed for dbus-bridge application])
 fi
 
-# glnexus USE flag
-AC_MSG_CHECKING([Needed for opengl over nexus support (default : disabled)])
-AC_ARG_ENABLE(glnexus,
-              AC_HELP_STRING([--enable-glnexus],
-                             [Needed for opengl over nexus support (default : disabled)]),
-              [],[enable_glnexus="no"])
-AC_MSG_RESULT([$enable_glnexus])
-if test "$enable_glnexus" = "yes"; then
-    AC_DEFINE([ENABLE_GLNEXUS_SUPPORT], [1], [Needed for opengl over nexus support])
-fi
-
 # opengl USE flag
 AC_MSG_CHECKING([Needed for opengl support (default : disabled)])
-AC_ARG_ENABLE(glnexus,
+AC_ARG_ENABLE(opengl,
               AC_HELP_STRING([--enable-opengl],
                              [Needed for opengl support (default : disabled)]),
               [],[enable_opengl="no"])
@@ -511,7 +500,7 @@ fi
 
 # directfb USE flag
 AC_MSG_CHECKING([Needed for directfb support (default : disabled)])
-AC_ARG_ENABLE(glnexus,
+AC_ARG_ENABLE(directfb,
               AC_HELP_STRING([--enable-directfb],
                              [Needed for directfb support (default : disabled)]),
               [],[enable_directfb="no"])

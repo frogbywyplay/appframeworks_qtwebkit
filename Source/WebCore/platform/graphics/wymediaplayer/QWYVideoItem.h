@@ -12,7 +12,7 @@
 
 namespace WebCore
 {
-#if defined(ENABLE_GLNEXUS_SUPPORT) || defined(ENABLE_OPENGL_SUPPORT)
+#if defined(ENABLE_OPENGL_SUPPORT)
 class QWYVideoItem
 {
 };
@@ -39,7 +39,7 @@ Q_SIGNALS:
 public:
         void notifyRepaint();
 };
-#endif // ENABLE_GLNEXUS_SUPPORT
+#endif // ENABLE_OPENGL_SUPPORT
 };
 
 #endif /* QWYVIDEOITEM_H_ */

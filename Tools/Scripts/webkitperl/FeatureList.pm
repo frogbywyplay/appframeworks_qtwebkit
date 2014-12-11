@@ -137,7 +137,6 @@ my (
     $wymediaplayerSupport,
     $openglSupport,
     $directfbSupport,
-    $glnexusSupport,
     $dbusbridgeSupport,
     $videoTrackSupport,
     $webglSupport,
@@ -431,9 +430,6 @@ my @features = (
 
     { option => "directfb", desc => "Toggle directfb support",
       define => "ENABLE_DFB_SUPPORT", default => 0, value => \$directfbSupport },
-
-    { option => "glnexus", desc => "Toggle opengl over nexus support",
-      define => "ENABLE_GLNEXUS_SUPPORT", default => 0, value => \$glnexusSupport },
 
     { option => "dbus-bridge", desc => "Toggle dbus bridge support",
       define => "ENABLE_DBUS_BRIDGE", default => 0, value => \$dbusbridgeSupport },

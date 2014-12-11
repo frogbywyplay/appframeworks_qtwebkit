@@ -38,9 +38,9 @@
 
 namespace WebCore {
 
-#if defined(ENABLE_GLNEXUS_SUPPORT) || defined(ENABLE_OPENGL_SUPPORT)
+#if defined(ENABLE_OPENGL_SUPPORT)
 class WMPHLayer;
-#endif
+#endif // ENABLE_OPENGL_SUPPORT
 
 class MediaPlayerPrivateWYMediaPlayer :
     public MediaPlayerPrivateInterface,
@@ -66,11 +66,11 @@ private:
 private:
     MediaPlayer* m_webCorePlayer;
 
-#if defined(ENABLE_GLNEXUS_SUPPORT) || defined(ENABLE_OPENGL_SUPPORT)
+#if defined(ENABLE_OPENGL_SUPPORT)
 #if USE(ACCELERATED_COMPOSITING)
     WMPHLayer *m_layer;
 #endif
-#endif // ENABLE_GLNEXUS_SUPPORT
+#endif // ENABLE_OPENGL_SUPPORT
 
     WYSmartPtr<IMediaPlayer>            m_spMediaPlayer;
     WYSmartPtr<IWebkitMediaPlayer>      m_spWebkitMediaPlayer;
@@ -115,9 +115,9 @@ protected:
 public:
             // player status change mng
             static void updateStatesCallback(void* thiz);
-#if defined(ENABLE_GLNEXUS_SUPPORT) || defined(ENABLE_OPENGL_SUPPORT)
+#if defined(ENABLE_OPENGL_SUPPORT)
             static void differedRepaint(void *thiz);
-#endif // ENABLE_GLNEXUS_SUPPORT
+#endif // ENABLE_OPENGL_SUPPORT
 
 public:
     static  PassOwnPtr<MediaPlayerPrivateInterface>    create(MediaPlayer* player);

@@ -37,16 +37,16 @@ using namespace WebCore;
 #include <cairo.h>
 #include <cairo-directfb.h>
 #endif
-#endif // ENABLE_GLNEXUS_SUPPORT
+#endif // ENABLE_DFB_SUPPORT
 
 #if PLATFORM(QT)
 #include <QPixmap>
 #endif
 
-#if defined(ENABLE_GLNEXUS_SUPPORT) || defined(ENABLE_OPENGL_SUPPORT)
+#if defined(ENABLE_OPENGL_SUPPORT)
 #include <GLES2/gl2.h>
 #include <QGLContext>
-#endif // opengl + glnexus
+#endif // ENABLE_OPENGL_SUPPORT
 
 #ifdef ENABLE_DFB_SUPPORT
 #if PLATFORM(QT)
@@ -119,11 +119,11 @@ ImageWYMediaPlayer::~ImageWYMediaPlayer()
 CWYMediaPlayerLibrary               g_libraryWYMediaPlayer;
 WYSmartPtr<IFactory>                g_spWYMediaPlayerFactory;
 WYSmartPtr<IMediaPlayersManager>    g_spMediaPlayersManager;
-#if defined(ENABLE_GLNEXUS_SUPPORT) || defined(ENABLE_OPENGL_SUPPORT)
+#if defined(ENABLE_OPENGL_SUPPORT)
 bool                                g_bTraceEnabled = true;
 #else
 bool                                g_bTraceEnabled = false;
-#endif // ENABLE_GLNEXUS_SUPPORT
+#endif // ENABLE_OPENGL_SUPPORT
 bool                                g_bPreserveAspectRatio = true;
 
 bool MediaPlayerPrivateWYMediaPlayer::doWYMediaPlayerInit()
@@ -263,9 +263,9 @@ MediaPlayerPrivateWYMediaPlayer::~MediaPlayerPrivateWYMediaPlayer()
 {
     WY_TRACK(MediaPlayerPrivateWYMediaPlayer);
     cancelCallOnMainThread(updateStatesCallback, this);
-#if defined(ENABLE_GLNEXUS_SUPPORT) || defined(ENABLE_OPENGL_SUPPORT)
+#if defined(ENABLE_OPENGL_SUPPORT)
     cancelCallOnMainThread(differedRepaint, this);
-#endif // ENABLE_GLNEXUS_SUPPORT
+#endif // ENABLE_OPENGL_SUPPORT
     uninit();
 }
 
@@ -869,7 +869,7 @@ void MediaPlayerPrivateWYMediaPlayer::paintCurrentFrameInContext(GraphicsContext
     paint(c, r);
 }
 
-#if defined(ENABLE_GLNEXUS_SUPPORT) || defined(ENABLE_OPENGL_SUPPORT)
+#if defined(ENABLE_OPENGL_SUPPORT)
 bool MediaPlayerPrivateWYMediaPlayer::supportsAcceleratedRendering() const
 {
     return false;
@@ -884,7 +884,7 @@ PlatformLayer* MediaPlayerPrivateWYMediaPlayer::platformLayer() const
     return NULL;
 }
 
-#else // ENABLE_GLNEXUS_SUPPORT
+#else // ENABLE_OPENGL_SUPPORT
 
 #if USE(ACCELERATED_COMPOSITING) && USE(TEXTURE_MAPPER)
 void MediaPlayerPrivateWYMediaPlayer::paintToTextureMapper(TextureMapper* textureMapper, const FloatRect& targetRect, const TransformationMatrix& matrix, float opacity, BitmapTexture*) const
@@ -1022,7 +1022,7 @@ bool MediaPlayerPrivateWYMediaPlayer::renderVideoFrame(GraphicsContext* c, const
     return false;
 }
 
-#endif // ENABLE_GLNEXUS_SUPPORT
+#endif // ENABLE_OPENGL_SUPPORT
 
 void MediaPlayerPrivateWYMediaPlayer::paint(GraphicsContext* c, const IntRect& r)
 {
@@ -1259,7 +1259,7 @@ void MediaPlayerPrivateWYMediaPlayer::durationChanged()
     }
 }
 
-#if defined(ENABLE_GLNEXUS_SUPPORT) || defined(ENABLE_OPENGL_SUPPORT)
+#if defined(ENABLE_OPENGL_SUPPORT)
 void MediaPlayerPrivateWYMediaPlayer::differedRepaint(void *p_thiz)
 {
     WY_TRACK(MediaPlayerPrivateWYMediaPlayer);
@@ -1295,7 +1295,7 @@ void MediaPlayerPrivateWYMediaPlayer::repaint()
         callOnMainThread(differedRepaint, this);
     }
 }
-#else  // ENABLE_GLNEXUS_SUPPORT
+#else  // ENABLE_OPENGL_SUPPORT
 
 #if PLATFORM(QT)
 void MediaPlayerPrivateWYMediaPlayer::onRepaintAsked()
@@ -1315,7 +1315,7 @@ void MediaPlayerPrivateWYMediaPlayer::repaint()
     if (m_webCorePlayer) m_webCorePlayer->repaint();
 }
 #endif // PLATFORM(QT)
-#endif // ENABLE_GLNEXUS_SUPPORT
+#endif // ENABLE_OPENGL_SUPPORT
 
 float MediaPlayerPrivateWYMediaPlayer::rate()
 {

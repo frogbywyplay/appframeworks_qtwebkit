@@ -36,4 +36,4 @@ void QWYVideoItem::onRepaintAsked()
         m_pMediaPlayerPrivateWYMediaPlayer->onRepaintAsked();
     }
 }
-#endif // ENABLE_GLNEXUS_SUPPORT
+#endif // ENABLE_DFB_SUPPORT
