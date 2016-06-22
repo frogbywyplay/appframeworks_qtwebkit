@@ -1103,7 +1103,7 @@
 #endif
 
 /* Accelerated compositing */
-#if PLATFORM(MAC) || PLATFORM(IOS) || PLATFORM(QT) || (PLATFORM(WIN) && !OS(WINCE) && !PLATFORM(WIN_CAIRO))
+#if PLATFORM(MAC) || PLATFORM(IOS) || (ENABLE(3D_RENDERING) && PLATFORM(QT)) || (PLATFORM(WIN) && !OS(WINCE) && !PLATFORM(WIN_CAIRO))
 #define WTF_USE_ACCELERATED_COMPOSITING 1
 #endif
 
@@ -1115,8 +1115,7 @@
 #define WTF_USE_3D_GRAPHICS 1
 #endif
 
-/* Qt always uses Texture Mapper */
-#if PLATFORM(QT)
+#if USE(ACCELERATED_COMPOSITING) && PLATFORM(QT)
 #define WTF_USE_TEXTURE_MAPPER 1
 #endif
 

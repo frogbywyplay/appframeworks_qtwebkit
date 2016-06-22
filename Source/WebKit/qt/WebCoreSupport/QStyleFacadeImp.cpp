@@ -24,6 +24,7 @@
 #include "config.h"
 
 #include "QStyleFacadeImp.h"
+#include "IntRect.h"
 
 #include <QApplication>
 #include <QLineEdit>
