@@ -71,6 +71,7 @@ private:
     QWebPage* m_frontendWebPage;
     InspectorFrontendClientQt* m_frontendClient;
     bool m_remoteInspector;
+    bool m_hidden;
     InspectorServerRequestHandlerQt* m_remoteFrontEndChannel;
 
     friend class InspectorServerRequestHandlerQt;

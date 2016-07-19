@@ -179,6 +179,7 @@ InspectorClientQt::InspectorClientQt(QWebPage* page)
     : m_inspectedWebPage(page)
     , m_frontendWebPage(0)
     , m_frontendClient(0)
+    , m_hidden(true)
     , m_remoteFrontEndChannel(0)
 {
     InspectorServerQt* webInspectorServer = InspectorServerQt::server();
@@ -287,17 +288,27 @@ void InspectorClientQt::detachRemoteFrontend()
 
 void InspectorClientQt::highlight()
 {
-    hideHighlight();
-}
-
-void InspectorClientQt::hideHighlight()
-{
     WebCore::Frame* frame = m_inspectedWebPage->d->page->mainFrame();
     if (frame) {
         QRect rect = m_inspectedWebPage->mainFrame()->geometry();
         if (!rect.isEmpty())
             frame->view()->invalidateRect(rect);
     }
+    m_hidden = false;
+}
+
+void InspectorClientQt::hideHighlight()
+{
+    if (m_hidden)
+        return;
+
+    WebCore::Frame* frame = m_inspectedWebPage->d->page->mainFrame();
+    if (frame) {
+        QRect rect = m_inspectedWebPage->mainFrame()->geometry();
+        if (!rect.isEmpty())
+            frame->view()->invalidateRect(rect);
+    }
+    m_hidden = true;
 }
 
 bool InspectorClientQt::sendMessageToFrontend(const String& message)
