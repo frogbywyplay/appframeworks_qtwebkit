@@ -18,7 +18,6 @@
 */
 
 #include "config.h"
-#if USE(TEXTURE_MAPPER)
 #include "GraphicsLayerTextureMapper.h"
 
 #include "GraphicsContext.h"
@@ -584,5 +583,3 @@ bool GraphicsLayerTextureMapper::setFilters(const FilterOperations& filters)
 #endif
 
 }
-
-#endif

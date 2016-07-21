@@ -578,10 +578,8 @@ void RenderLayer::updateBlendMode()
     BlendMode newBlendMode = renderer()->style()->blendMode();
     if (newBlendMode != m_blendMode) {
         m_blendMode = newBlendMode;
-#if USE(ACCELERATED_COMPOSITING)
         if (backing())
             backing()->setBlendMode(newBlendMode);
-#endif
     }
 }
 #endif
