@@ -7,7 +7,7 @@
 TEMPLATE = subdirs
 CONFIG += ordered
 
-!no_webkit1 {
+!production_build:!no_webkit1 {
     SUBDIRS += QtTestBrowser/QtTestBrowser.pro
     contains(DEFINES, HAVE_QTTESTLIB=1): SUBDIRS += DumpRenderTree/qt/DumpRenderTree.pro
     SUBDIRS += DumpRenderTree/qt/ImageDiff.pro
