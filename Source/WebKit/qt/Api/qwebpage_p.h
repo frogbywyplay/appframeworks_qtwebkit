@@ -134,7 +134,9 @@ public:
     // Returns whether the default action was cancelled in the JS event handler
     bool touchEvent(QTouchEvent*);
 
+#ifndef QT_NO_GESTURES
     bool gestureEvent(QGestureEvent*);
+#endif
 
     class TouchAdjuster {
     public:

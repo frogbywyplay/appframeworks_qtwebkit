@@ -1339,6 +1339,7 @@ bool QWebPagePrivate::touchEvent(QTouchEvent* event)
 #endif
 }
 
+#ifndef QT_NO_GESTURES
 bool QWebPagePrivate::gestureEvent(QGestureEvent* event)
 {
 #if ENABLE(GESTURE_EVENTS)
@@ -1369,6 +1370,7 @@ bool QWebPagePrivate::gestureEvent(QGestureEvent* event)
     return false;
 #endif
 }
+#endif
 
 /*!
   This method is used by the input method to query a set of properties of the page
