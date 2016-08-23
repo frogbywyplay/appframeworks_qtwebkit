@@ -133,7 +133,15 @@ void AnimationControllerPrivate::updateAnimationTimerForRenderer(RenderObject* r
     }
 
     m_previousTimeToNextService = timeToNextService;
-    m_animationTimer.startOneShot(timeToNextService);
+#if ENABLE(REQUEST_ANIMATION_FRAME) && !USE(REQUEST_ANIMATION_FRAME_TIMER)
+    if (!timeToNextService) {
+        if (FrameView* view = m_frame->view())
+            view->scheduleAnimation();
+    } else
+#endif
+    {
+        m_animationTimer.startOneShot(timeToNextService);
+    }
 }
 
 void AnimationControllerPrivate::updateAnimationTimer(SetChanged callSetChanged/* = DoNotCallSetChanged*/)
@@ -143,7 +151,12 @@ void AnimationControllerPrivate::updateAnimationTimer(SetChanged callSetChanged/
     // If we want service immediately, we start a repeating timer to reduce the overhead of starting
     if (!timeToNextService) {
         if (!m_animationTimer.isActive() || m_animationTimer.repeatInterval() == 0)
+#if ENABLE(REQUEST_ANIMATION_FRAME) && !USE(REQUEST_ANIMATION_FRAME_TIMER)
+            if (FrameView* view = m_frame->view())
+                view->scheduleAnimation();
+#else
             m_animationTimer.startRepeating(cAnimationTimerDelay);
+#endif
 
         m_previousTimeToNextService = timeToNextService;
         return;
@@ -540,10 +553,6 @@ PassRefPtr<RenderStyle> AnimationController::updateAnimations(RenderObject* rend
 
     if (renderer->parent() || newStyle->animations() || (oldStyle && oldStyle->animations())) {
         m_data->updateAnimationTimerForRenderer(renderer);
-#if ENABLE(REQUEST_ANIMATION_FRAME)
-        if (FrameView* view = renderer->document()->view())
-            view->scheduleAnimation();
-#endif
     }
 
     if (blendedStyle != newStyle) {
