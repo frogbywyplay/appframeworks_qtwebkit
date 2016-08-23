@@ -66,6 +66,7 @@ QT_END_NAMESPACE
 
 class QWebInspector;
 class QWebPageClient;
+class LayoutBeforePaintEventFilter;
 
 class QtViewportAttributesPrivate : public QSharedData {
 public:
@@ -216,6 +217,7 @@ public:
     QWebInspector* inspector;
     bool inspectorIsInternalOnly; // True if created through the Inspect context menu action
     Qt::DropAction m_lastDropAction;
+    QScopedPointer<LayoutBeforePaintEventFilter> layoutEventFilter;
 
     static bool drtRun;
 };

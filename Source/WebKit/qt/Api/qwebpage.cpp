@@ -299,6 +299,37 @@ static inline Qt::DropAction dragOpToDropAction(unsigned actions)
     return result;
 }
 
+class LayoutBeforePaintEventFilter : public QObject {
+    QWebPagePrivate *pagePrivate;
+public:
+    LayoutBeforePaintEventFilter(QWebPagePrivate *pagePrivate)
+    : pagePrivate(pagePrivate)
+    { }
+
+    bool eventFilter(QObject *obj, QEvent *event) {
+        // A Frame layout will trigger an invalidate with the changed rect,
+        // but since we advance animations, update styles and the layout also
+        // right before painting in order to get a non-invalid render tree, we
+        // sometimes end up rendering a new layout with the dirty rect of the
+        // precedent animation/layout. Since this rect is clipped on the QPainter
+        // before painting the widget tree, we might end up with objects that
+        // seem cut on the screen for some frames.
+        // To fix this, we have to force another layout before the QPainter
+        // is setting clipping using the dirty rect, and we do so by intercepting
+        // the UpdateRequest event sent to the top-level widget containing the
+        // QWebView. Since no input event or timer will happend between here
+        // and the paint event, the layout happening in QWebFramePrivate::renderRelativeCoords
+        // won't be needed and will return without affecting the render tree
+        // or dirty rect.
+        if (event->type() == QEvent::UpdateRequest) {
+            WebCore::FrameView *view = pagePrivate->mainFrame->d->frame->view();
+            view->updateLayoutAndStyleIfNeededRecursive();
+        }
+        return QObject::eventFilter(obj, event);
+    }
+};
+
+
 QWebPagePrivate::QWebPagePrivate(QWebPage *qq)
     : q(qq)
     , page(0)
@@ -322,6 +353,7 @@ QWebPagePrivate::QWebPagePrivate(QWebPage *qq)
     , inspector(0)
     , inspectorIsInternalOnly(false)
     , m_lastDropAction(Qt::IgnoreAction)
+    , layoutEventFilter(new LayoutBeforePaintEventFilter(this))
 {
 #if ENABLE(GEOLOCATION) || ENABLE(DEVICE_ORIENTATION)
     bool useMock = QWebPagePrivate::drtRun;
@@ -2029,6 +2061,9 @@ void QWebPage::setView(QWidget* view)
     if (this->view() == view)
         return;
 
+    if (d->view && d->view->window())
+        d->view->window()->removeEventFilter(d->layoutEventFilter.data());
+
     d->view = view;
     setViewportSize(view ? view->size() : QSize(0, 0));
 
@@ -2044,8 +2079,12 @@ void QWebPage::setView(QWidget* view)
         return;
     }
 
-    if (view)
+    if (view) {
         d->client = adoptPtr(new PageClientQWidget(view, this));
+
+        if (view->window())
+            view->window()->installEventFilter(d->layoutEventFilter.data());
+    }
 }
 
 /*!

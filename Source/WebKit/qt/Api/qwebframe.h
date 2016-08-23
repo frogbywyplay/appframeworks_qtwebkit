@@ -242,6 +242,7 @@ private:
     friend class QWebPagePrivate;
     friend class QWebFramePrivate;
     friend class DumpRenderTreeSupportQt;
+    friend class LayoutBeforePaintEventFilter;
     friend class WebCore::WidgetPrivate;
     friend class WebCore::FrameLoaderClientQt;
     friend class WebCore::ChromeClientQt;
