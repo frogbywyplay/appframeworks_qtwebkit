@@ -128,8 +128,10 @@ GraphicsContext3DPrivate::GraphicsContext3DPrivate(GraphicsContext3D* context, H
             m_surface = m_platformContext->surface();
 #else
         QGLContext* platformContext = const_cast<QGLContext*>(QGLContext::currentContext());
-#ifndef QT_NO_DYNAMIC_CAST
+#ifdef __GXX_RTTI
         m_surface = platformContext ? dynamic_cast<QGLWidget*>(platformContext->device()) : 0;
+#else
+        m_surface = platformContext ? static_cast<QGLWidget*>(platformContext->device()) : 0;
 #endif
         if (m_surface)
             m_platformContext = platformContext;
