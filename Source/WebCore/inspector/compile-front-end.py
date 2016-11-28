@@ -348,6 +348,7 @@ modules = [
     },
     {
         "name": "inspector",
+            "ProfilesPanelDescriptor.js",
         "dependencies": ["components"],
         "sources": [
             "DockController.js",

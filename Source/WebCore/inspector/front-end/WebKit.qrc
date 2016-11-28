@@ -139,6 +139,7 @@
     <file>Resource.js</file>
     <file>RequestCookiesView.js</file>
     <file>RequestJSONView.js</file>
+    <file>ProfilesPanelDescriptor.js</file>
     <file>RequestHTMLView.js</file>
     <file>RequestHeadersView.js</file>
     <file>RequestPreviewView.js</file>

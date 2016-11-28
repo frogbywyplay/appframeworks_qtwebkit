@@ -1,3 +1,12 @@
+2013-02-15  Eugene Klyuchnikov  <eustas@chromium.org>
+
+        Web Inspector: Introduce ProfilesPanelDescriptor.
+        https://bugs.webkit.org/show_bug.cgi?id=109906
+
+        Reviewed by Pavel Feldman.
+
+        * inspector/profiler/heap-snapshot-test.js: Adopted changes.
+
 2013-06-14  Eric Carlson  <eric.carlson@apple.com>
 
         Potential use-after-free with an event fired at a HTMLMediaElement which is currently being deleted

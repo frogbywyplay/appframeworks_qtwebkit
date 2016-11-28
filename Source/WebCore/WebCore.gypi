@@ -5254,6 +5254,7 @@
             'platform/image-decoders/jpeg/JPEGImageDecoder.h',
             'platform/image-decoders/openvg/ImageDecoderOpenVG.cpp',
             'platform/image-decoders/png/PNGImageDecoder.cpp',
+            'inspector/front-end/ProfilesPanelDescriptor.js',
             'platform/image-decoders/png/PNGImageDecoder.h',
             'platform/image-decoders/skia/ImageDecoderSkia.cpp',
             'platform/image-decoders/webp/WEBPImageDecoder.cpp',

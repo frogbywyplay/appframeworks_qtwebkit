@@ -306,5 +306,3 @@ difflib.SequenceMatcher.prototype.get_opcodes = function() { return []; }
 
 /** @constructor */
 WebInspector.CodeMirrorTextEditor = function(url, delegate) { }
-
-WebInspector.ProfileURLRegExp = "";
