@@ -138,7 +138,7 @@ public:
     virtual PlatformLayer* platformLayer() const { return 0; }
 #if USE(TEXTURE_MAPPER)
     // Const-casting here is safe, since all of TextureMapperPlatformLayer's functions are const.g
-    virtual void paintToTextureMapper(TextureMapper*, const FloatRect& targetRect, const TransformationMatrix&, float opacity, BitmapTexture* mask) const;
+    virtual void paintToTextureMapper(TextureMapper*, const FloatRect& targetRect, const TransformationMatrix&, float opacity, BitmapTexture* mask);
 #endif // USE(TEXTURE_MAPPER)
 #else // ENABLE_DFB_SUPPORT
     virtual PlatformLayer* platformLayer() const;

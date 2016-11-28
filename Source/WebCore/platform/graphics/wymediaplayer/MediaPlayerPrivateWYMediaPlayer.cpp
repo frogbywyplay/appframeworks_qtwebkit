@@ -887,7 +887,7 @@ PlatformLayer* MediaPlayerPrivateWYMediaPlayer::platformLayer() const
 #else // ENABLE_OPENGL_SUPPORT
 
 #if USE(ACCELERATED_COMPOSITING) && USE(TEXTURE_MAPPER)
-void MediaPlayerPrivateWYMediaPlayer::paintToTextureMapper(TextureMapper* textureMapper, const FloatRect& targetRect, const TransformationMatrix& matrix, float opacity, BitmapTexture*) const
+void MediaPlayerPrivateWYMediaPlayer::paintToTextureMapper(TextureMapper* textureMapper, const FloatRect& targetRect, const TransformationMatrix& matrix, float opacity, BitmapTexture* mask)
 {
     //printf("%s:%s():%d : MediaPlayerPrivateWYMediaPlayer::paintToTextureMapper()\n", __FILE__, __FUNCTION__, __LINE__);
     GraphicsContext* context = textureMapper->graphicsContext();
@@ -936,7 +936,7 @@ bool MediaPlayerPrivateWYMediaPlayer::renderVideoFrame(GraphicsContext* c, const
 
     IntRect cTw(m_webCorePlayer->frameView()->contentsToWindow(r));
 
-    if (m_spWebkitMediaPlayer->videoFrame(&l_pDirectFBSurface, cTw.x(), cTw.y(), cTw.width(), cTw.height()))
+    if (m_spWebkitMediaPlayer->videoFrame((void **)&l_pDirectFBSurface, cTw.x(), cTw.y(), cTw.width(), cTw.height()))
     {
         FloatRect rect(r.x(), r.y(), r.width(), r.height());
         c->clearRect(rect);
@@ -1004,7 +1004,7 @@ bool MediaPlayerPrivateWYMediaPlayer::renderVideoFrame(GraphicsContext* c, const
                         l_rectBB2.setY(l_rectBB2.y() + r.y());
                     }
                     c->fillRect(l_rectBB1, Color(1,0,0), ColorSpaceSRGB);
-                    c->drawImage(reinterpret_cast<Image*>(l_image.get()), ColorSpaceSRGB, l_rectDestinationArea, CompositeCopy, false);
+                    c->drawImage(reinterpret_cast<Image*>(l_image.get()), ColorSpaceSRGB, l_rectDestinationArea, CompositeCopy, DoNotRespectImageOrientation, false);
                     c->fillRect(l_rectBB2, Color(1,0,0), ColorSpaceSRGB);
                 }
             }
