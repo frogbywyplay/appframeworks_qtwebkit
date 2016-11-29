@@ -256,6 +256,9 @@ public:
     JPEGImageReader(JPEGImageDecoder* decoder)
         : m_decoder(decoder)
         , m_bufferLength(0)
+#if ENABLE(JPEG_INSTANT_DISPLAY)
+        , m_lastCompleteScan(0)
+#endif
         , m_bytesToSkip(0)
         , m_state(JPEG_HEADER)
         , m_samples(0)
@@ -467,11 +470,22 @@ public:
                     if (!m_info.output_scanline) {
                         int scan = m_info.input_scan_number;
 
+#if ENABLE(JPEG_INSTANT_DISPLAY)
+                        if (status != JPEG_REACHED_EOI) {
+                            // Avoid sequential output. Consider only full
+                            // scans, and output them only once.
+                            if (scan <= m_lastCompleteScan + 1)
+                                return false;
+                            // Now output the latest full scan.
+                            --scan;
+                        }
+#else
                         // If we haven't displayed anything yet
                         // (output_scan_number == 0) and we have enough data for
                         // a complete scan, force output of the last full scan.
                         if (!m_info.output_scan_number && (scan > 1) && (status != JPEG_REACHED_EOI))
                             --scan;
+#endif
 
                         if (!jpeg_start_output(&m_info, scan))
                             return false; // I/O suspension.
@@ -492,6 +506,9 @@ public:
                     if (m_info.output_scanline == m_info.output_height) {
                         if (!jpeg_finish_output(&m_info))
                             return false; // I/O suspension.
+#if ENABLE(JPEG_INSTANT_DISPLAY)
+                        m_lastCompleteScan = m_info.output_scan_number > 0 ? static_cast<unsigned>(m_info.output_scan_number) : 0;
+#endif
 
                         if (jpeg_input_complete(&m_info) && (m_info.input_scan_number == m_info.output_scan_number))
                             break;
@@ -516,6 +533,9 @@ public:
         return true;
     }
 
+#if ENABLE(JPEG_INSTANT_DISPLAY)
+    unsigned availableScan() const { return m_lastCompleteScan; }
+#endif
     jpeg_decompress_struct* info() { return &m_info; }
     JSAMPARRAY samples() const { return m_samples; }
     JPEGImageDecoder* decoder() { return m_decoder; }
@@ -548,6 +568,9 @@ public:
 private:
     JPEGImageDecoder* m_decoder;
     unsigned m_bufferLength;
+#if ENABLE(JPEG_INSTANT_DISPLAY)
+    unsigned m_lastCompleteScan;
+#endif
     int m_bytesToSkip;
     bool m_decodingSizeOnly;
 
@@ -636,6 +659,21 @@ ImageFrame* JPEGImageDecoder::frameBufferAtIndex(size_t index)
         PlatformInstrumentation::willDecodeImage("JPEG");
         decode(false);
         PlatformInstrumentation::didDecodeImage();
+#if ENABLE(JPEG_INSTANT_DISPLAY)
+        // Disable sequential display. Basically, wait for FrameComplete status
+        // and then provide the complete image. However do preserve the
+        // iterative display of progressive JPEGs.
+        if (frame.status() == ImageFrame::FramePartial) {
+            if (!m_reader)
+                return 0;
+            // Standard JPEGs feature no scan; always wait for FrameComplete.
+            // May a scan become available i.e. fully decoded and framed, case
+            // of progressive JPEGs, start providing it to the upper layer.
+            // Provide later scans as well, when then become available.
+            if (!m_reader->availableScan())
+                return 0;
+        }
+#endif
     }
     return &frame;
 }
