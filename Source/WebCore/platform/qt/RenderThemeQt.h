@@ -96,6 +96,8 @@ public:
     virtual String extraMediaControlsStyleSheet();
 #endif
 
+    virtual bool shouldShowPlaceholderWhenFocused() const { return true; }
+
 protected:
     virtual bool paintCheckbox(RenderObject*, const PaintInfo&, const IntRect&);
     virtual void setCheckboxSize(RenderStyle*) const;
