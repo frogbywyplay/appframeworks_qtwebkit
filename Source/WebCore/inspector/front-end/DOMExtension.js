@@ -540,10 +540,37 @@ Node.prototype.traversePreviousNode = function(stayWithin)
 
 function isEnterKey(event) {
     // Check if in IME.
-    return event.keyCode !== 229 && event.keyIdentifier === "Enter";
+    return (event.keyCode !== 229 && event.keyIdentifier === "Enter") || event.keyCode === 13;
 }
 
 function consumeEvent(e)
 {
     e.consume();
 }
+
+Object.defineProperty(KeyboardEvent.prototype, 'keyIdentifier', {
+    get: function() {
+        switch (this.key) {
+            case "ArrowDown":
+                return "Down";
+                break;
+            case "ArrowLeft":
+                return "Left";
+                break;
+            case "ArrowRight":
+                return "Right";
+                break;
+            case "ArrowUp":
+                return "Up";
+                break;
+            case "Tab":
+                return "U+0009";
+                break;
+            case "Escape":
+                return "U+001B";
+                break;
+            default:
+                return this.key;
+        } 
+    }
+});
