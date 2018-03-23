@@ -9,10 +9,11 @@
 #define QWYVIDEOITEM_H_
 
 #include <QObject>
+#include <wtf/Platform.h>
 
 namespace WebCore
 {
-#if defined(ENABLE_OPENGL_SUPPORT)
+#if ENABLE(OPENGL_SUPPORT)
 class QWYVideoItem
 {
 };

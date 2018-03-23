@@ -38,7 +38,7 @@
 
 namespace WebCore {
 
-#if defined(ENABLE_OPENGL_SUPPORT)
+#if ENABLE(OPENGL_SUPPORT)
 class WMPHLayer;
 #endif // ENABLE_OPENGL_SUPPORT
 
@@ -66,7 +66,7 @@ private:
 private:
     MediaPlayer* m_webCorePlayer;
 
-#if defined(ENABLE_OPENGL_SUPPORT)
+#if ENABLE(OPENGL_SUPPORT)
 #if USE(ACCELERATED_COMPOSITING)
     WMPHLayer *m_layer;
 #endif
@@ -115,7 +115,7 @@ protected:
 public:
             // player status change mng
             static void updateStatesCallback(void* thiz);
-#if defined(ENABLE_OPENGL_SUPPORT)
+#if ENABLE(OPENGL_SUPPORT)
             static void differedRepaint(void *thiz);
 #endif // ENABLE_OPENGL_SUPPORT
 

@@ -43,7 +43,7 @@ using namespace WebCore;
 #include <QPixmap>
 #endif
 
-#if defined(ENABLE_OPENGL_SUPPORT)
+#if ENABLE(OPENGL_SUPPORT)
 #include <GLES2/gl2.h>
 #include <QGLContext>
 #endif // ENABLE_OPENGL_SUPPORT
@@ -119,7 +119,7 @@ ImageWYMediaPlayer::~ImageWYMediaPlayer()
 CWYMediaPlayerLibrary               g_libraryWYMediaPlayer;
 WYSmartPtr<IFactory>                g_spWYMediaPlayerFactory;
 WYSmartPtr<IMediaPlayersManager>    g_spMediaPlayersManager;
-#if defined(ENABLE_OPENGL_SUPPORT)
+#if ENABLE(OPENGL_SUPPORT)
 bool                                g_bTraceEnabled = true;
 #else
 bool                                g_bTraceEnabled = false;
@@ -263,7 +263,7 @@ MediaPlayerPrivateWYMediaPlayer::~MediaPlayerPrivateWYMediaPlayer()
 {
     WY_TRACK(MediaPlayerPrivateWYMediaPlayer);
     cancelCallOnMainThread(updateStatesCallback, this);
-#if defined(ENABLE_OPENGL_SUPPORT)
+#if ENABLE(OPENGL_SUPPORT)
     cancelCallOnMainThread(differedRepaint, this);
 #endif // ENABLE_OPENGL_SUPPORT
     uninit();
@@ -869,7 +869,7 @@ void MediaPlayerPrivateWYMediaPlayer::paintCurrentFrameInContext(GraphicsContext
     paint(c, r);
 }
 
-#if defined(ENABLE_OPENGL_SUPPORT)
+#if ENABLE(OPENGL_SUPPORT)
 bool MediaPlayerPrivateWYMediaPlayer::supportsAcceleratedRendering() const
 {
     return false;
@@ -1259,7 +1259,7 @@ void MediaPlayerPrivateWYMediaPlayer::durationChanged()
     }
 }
 
-#if defined(ENABLE_OPENGL_SUPPORT)
+#if ENABLE(OPENGL_SUPPORT)
 void MediaPlayerPrivateWYMediaPlayer::differedRepaint(void *p_thiz)
 {
     WY_TRACK(MediaPlayerPrivateWYMediaPlayer);
