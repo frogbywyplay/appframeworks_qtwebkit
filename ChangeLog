@@ -1,3 +1,7 @@
+9999
+- Add support for static build of libQtWebkit.a (to be used with mklibs only)
+
+=================================================================
 2013-04-22  Allan Sandfeld Jensen  <allan.jensen@digia.com>
 
         [Qt4] QtWebKit 2.3.1 broke compilation on MSVC
@@ -84,7 +88,7 @@
         * Source/cmake/OptionsEfl.cmake: Turn on ENABLE_3D_RENDERING and
         ENABLE_WEBGL
         * Source/cmake/WebKitFeatures.cmake: Use
-        ${_WEBKIT_AVAILABLE_OPTIONS_INITALVALUE_${_name}} to as value of 
+        ${_WEBKIT_AVAILABLE_OPTIONS_INITALVALUE_${_name}} to as value of
         a feature is enabled. Adjust options in lexicographical order.
 
 2012-11-26  Kalev Lember  <kalevlember@gmail.com>
@@ -108,7 +112,7 @@
 
         Make sure that compiler and linker flags specified by the build system
         are always prepended to the variables that can be specified by the
-        environment and the user as well. 
+        environment and the user as well.
 
         * Source/cmake/OptionsCommon.cmake:
         * Source/cmake/OptionsWindows.cmake:
@@ -148,7 +152,7 @@
 
         Remove the definition of WTF_PLATFORM_EFL from the build system to
         make the EFL port consistent with other ports.
- 
+
         * Source/cmake/OptionsEfl.cmake:
 
 2012-11-23  Krzysztof Czech  <k.czech@samsung.com>
@@ -491,7 +495,7 @@
 
         Reviewed by Gyuyoung Kim.
 
-        Turn on error on warning for "switch" by removing "-Wno-error=switch" 
+        Turn on error on warning for "switch" by removing "-Wno-error=switch"
 
         * Source/cmake/WebKitHelpers.cmake:
 
@@ -538,10 +542,10 @@
         Treat all warnings as errors, except the existing warnings in the
         current code base ("unused-parameter", "sign-compare" and "switch").
 
-        Thanks for Raphael Kubo da Costa for the extra help.      
+        Thanks for Raphael Kubo da Costa for the extra help.
 
         * Source/CMakeLists.txt: Enable warnings as error for all libraries
-        (except WebKit and WebKit2) for the EFL port. 
+        (except WebKit and WebKit2) for the EFL port.
         Other cmake-based ports are welcome to join.
 
         * Source/cmake/WebKitHelpers.cmake: Treat warnings as errors by
@@ -579,7 +583,7 @@
         Reviewed by Kenneth Rohde Christiansen.
 
         Remove WTF_USE_PTHREADS, WTF_USE_ICU_UNICODE, WTF_USE_CAIRO,
-        WTF_USE_FREETYPE and WTF_USE_HARFBUZZ_NG cmake variables 
+        WTF_USE_FREETYPE and WTF_USE_HARFBUZZ_NG cmake variables
         as these are always set to const 1 and not really configurable.
 
         Remove the definition of ENABLE_CONTEXT_MENUS as this is already set to 1 by default in Platform.h.
@@ -651,7 +655,7 @@
 
         * Source/autotools/symbols.filter:
 
-2012-11-07  Shinya Kawanaka  <shinyak@chromium.org> 
+2012-11-07  Shinya Kawanaka  <shinyak@chromium.org>
 
         Unreviewed, rolling out r133428 and r133749
         https://bugs.webkit.org/show_bug.cgi?id=101533
@@ -700,7 +704,7 @@
 
         Reviewed by Kenneth Rohde Christiansen.
 
-        Remove unused cmake variables. In addition there is no longer a need to define 
+        Remove unused cmake variables. In addition there is no longer a need to define
         WTF_USE_TEXTURE_MAPPER_GL in the build system as that is now handled in Platform.h
         (see r133623).
 
@@ -1302,7 +1306,7 @@
 
         Attempt to fix gtk build which controls exports via this mysteriously-named
         file.
-        
+
         * Source/autotools/symbols.filter:
 
 2012-10-10  Shinya Kawanaka  <shinyak@chromium.org>
@@ -1480,7 +1484,7 @@
 
 2012-10-03  Otto Derek Cheung  <otcheung@rim.com>
 
-        [BlackBerry] Implementing the NetworkInfo API for BB port 
+        [BlackBerry] Implementing the NetworkInfo API for BB port
         https://bugs.webkit.org/show_bug.cgi?id=98273
 
         Reviewed by Rob Buis.
@@ -2193,9 +2197,9 @@
 
 2012-09-04  Jinwoo Song  <jinwoo7.song@samsung.com>
 
-        [CMAKE] Update cmakeconfig.h.cmake 
+        [CMAKE] Update cmakeconfig.h.cmake
         https://bugs.webkit.org/show_bug.cgi?id=95712
-       
+
         Reviewed by Gyuyoung Kim.
 
         Update feature definitions which are missing compared to WebKitFeatures.cmake
@@ -2210,10 +2214,10 @@
         Reviewed by Gyuyoung Kim.
 
         WEBKIT_USER_AGENT_MAJOR_VERSION and WEBKIT_USER_AGENT_MINOR_VERSION
-        are defined as constant in the OptionsEfl.cmake. But we do not need 
+        are defined as constant in the OptionsEfl.cmake. But we do not need
         to define these here but can use the defined constant in WebKitVersion.h.
 
-        WebKitVersion.h is already generated with the version information 
+        WebKitVersion.h is already generated with the version information
         from the Source/WebCore/Configurations/Version.xcconfig.
 
         * Source/cmake/OptionsEfl.cmake: Do not set WEBKIT_USER_AGENT_* variables.
@@ -2305,7 +2309,7 @@
 
         [wx] Unreviewed build fix. Disable compilation of WebDOM file for now,
         add the opentype directory, and remove old ATSUI files no longer in the tree.
-        
+
         * wscript:
 
 2012-08-22  Jesus Sanchez-Palencia  <jesus.palencia@openbossa.org>
@@ -2365,10 +2369,10 @@
 2012-08-22  Beth Dakin  <bdakin@apple.com>
 
         https://bugs.webkit.org/show_bug.cgi?id=94401
-        Add support for making a web site become paginated using overflow: 
+        Add support for making a web site become paginated using overflow:
         paged-x | paged-y
         -and corresponding-
-        <rdar://problem/11831783> 
+        <rdar://problem/11831783>
 
         Reviewed by Dave Hyatt.
 
@@ -2719,7 +2723,7 @@
         _LIBRARY_C_FLAGS} and ${CMAKE_SHARED_LIBRARY_CXX_FLAGS} is
         set to empty (See cmake/Modules/Platform/QNX.cmake)
 
-        This breaks the assumption which WebKit CMake build system 
+        This breaks the assumption which WebKit CMake build system
         makes in Source/cmake/WebKitHelper.cmake
 
         * Source/cmake/OptionsBlackBerry.cmake:
@@ -3121,7 +3125,7 @@
 
 2012-07-23  Roger Fong  <roger_fong@apple.com>
 
-        If select element in Windows is off screen horizontally, 
+        If select element in Windows is off screen horizontally,
         menu is either inappropriately resized or positioned offscreen.
         https://bugs.webkit.org/show_bug.cgi?id=91913
         <rdar://problem/7611229>
@@ -3129,7 +3133,7 @@
         Reviewed by Tim Horton.
 
         Add a manual test to verify that popup menus render in the correct place.
-        
+
         * ManualTests/win/select-menu-off-screen.html: Added.
 
 2012-07-23  Simon Fraser  <simon.fraser@apple.com>
@@ -3140,7 +3144,7 @@
         Reviewed by Ojan Vafai.
 
         Add ENABLE_CSS_STICKY_POSITION, defaulting to off initially.
-        
+
         Sort the ENABLE_CSS lines in the file.
 
         * Source/cmake/WebKitFeatures.cmake:
@@ -3900,9 +3904,9 @@
         https://bugs.webkit.org/show_bug.cgi?id=90241
 
         This issue is caused by single quotes in option's labels.
-        We should use the escape character of single quotes in JavaScript's string which 
+        We should use the escape character of single quotes in JavaScript's string which
         starts and ends with single quotes.
-        So we replace lablels' single quotes with its escape character during generating the 
+        So we replace lablels' single quotes with its escape character during generating the
         select popUp's HTML.
 
 
@@ -4549,7 +4553,7 @@
         https://bugs.webkit.org/show_bug.cgi?id=87553
 
         Reviewed by Dean Jackson.
-        
+
         Manual test that adds a transform to a layer, forcing that
         layer to gain backing store.
 
