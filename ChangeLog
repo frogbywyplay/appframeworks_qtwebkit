@@ -1,7 +1,7 @@
-9999
+2.3.5.13 -- 29/05/2018
 - Add support for static build of libQtWebkit.a (to be used with mklibs only)
 
-=================================================================
+==========
 2013-04-22  Allan Sandfeld Jensen  <allan.jensen@digia.com>
 
         [Qt4] QtWebKit 2.3.1 broke compilation on MSVC
