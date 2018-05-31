@@ -116,7 +116,7 @@ haveQt(4) {
 CONFIG += include_webinspector
 
 # Limit the creation of thin archives to Linux, since only GNU's ar supports it.
-!debug_and_release:linux-*: CONFIG += gnu_thin_archives
+!debug_and_release:!contains(CONFIG, static-webkit):linux-*: CONFIG += gnu_thin_archives
 
 # Try to locate sqlite3 source (for WebCore)
 SQLITE3SRCDIR = $$(SQLITE3SRCDIR)
